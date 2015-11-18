@@ -548,6 +548,7 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
         }
         console.log("getDirectoryCategories");
         DB.getDirectoryCategories(function(err,data){
+            console.log("getDirectoryCategories",data);
             $scope.$apply(function(){
                 $scope.categories = data;
             });
