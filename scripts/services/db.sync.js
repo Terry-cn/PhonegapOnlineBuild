@@ -389,7 +389,7 @@ AKHB.services.db.DBSync =  (function(){
 						usage:request
 					};
 					$.post(url,postdata,function(res, textStatus, jqXHR){
-
+						console.log(arguments);
 						if(textStatus=="success"){
 							$.each(data,function(index,_usage){
 								persistence.remove(_usage);
@@ -446,12 +446,12 @@ AKHB.services.db.DBSync =  (function(){
 						callback(null);
 					},true);
 				},
-				function(callback){
-					console.log("syncUsage");
-					self.syncUsage(function(){
-						console.log("syncUsage finish");
-						callback(null);
-					},true);
+				// function(callback){
+				// 	console.log("syncUsage");
+				// 	self.syncUsage(function(){
+				// 		console.log("syncUsage finish");
+				// 		callback(null);
+				// 	},true);
 				},function(callback){
 					console.log("syncCommittees");
 					self.syncCommittees(function(){
