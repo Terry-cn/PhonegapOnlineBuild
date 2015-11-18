@@ -445,8 +445,7 @@ AKHB.services.db.DBSync =  (function(){
 						console.log("syncMessage finish");
 						callback(null);
 					},true);
-				},
-				// function(callback){
+				// },function(callback){
 				// 	console.log("syncUsage");
 				// 	self.syncUsage(function(){
 				// 		console.log("syncUsage finish");
