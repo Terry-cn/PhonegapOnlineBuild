@@ -405,21 +405,21 @@ AKHB.services.db.prototype.setDirectories = function(model,remoteAddress,callbac
 	url+='&id='+model.id;
 	url+='&inst_type='+model.inst_type;
 	url+='&last_content_synced='+model.last_modified_date;
-
-	$.get(url,function(data){
-		try{
-			data = JSON.parse(data);
-		}catch(ex){
-			//console.log(data);
-			callback(null);
-			return;
-		}
-		async.each(data.content,function(item,itemCallback){
-			itemCallback();
-		},function(err){
-			callback(err);
-		});
-	})
+	callback();
+	// $.get(url,function(data){
+	// 	try{
+	// 		data = JSON.parse(data);
+	// 	}catch(ex){
+	// 		//console.log(data);
+	// 		callback(null);
+	// 		return;
+	// 	}
+	// 	async.each(data.content,function(item,itemCallback){
+	// 		itemCallback();
+	// 	},function(err){
+	// 		callback(err);
+	// 	});
+	// })
 	
 };
 AKHB.services.db.prototype.setDirectory = function(model,id,callback){
