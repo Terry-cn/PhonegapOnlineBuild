@@ -284,6 +284,20 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
         });
         
         function initLogin(){
+             var syncTimes = 0;
+            var syncBackGround = function(callback){
+                syncTimes ++;
+                if(Auth.checkNetworkConnected()){
+                    DBSync.runInBackGround(function(){
+                        if(typeof callback == 'function') callback(); 
+                        setTimeout(function(){
+                            console.log('sync times:'+syncTimes);
+                            syncBackGround();
+                            
+                        },AKHB.config.synctimer);
+                    });
+                }
+            }
             var onlineLogin = function(){
                 Auth.isWebserviceWorking($http,function(err,result){
                     if(err){
@@ -305,11 +319,10 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                                 }
                                 else{
                                     
-                                    DBSync.runInBackGround(function(err){
+                                    syncBackGround(function(){
                                         rootScope.$emit("NOTBUSY");
                                         app.slidingMenu.setSwipeable(true);
                                         app.slidingMenu.setMainPage('pages/landingpage.html');
-                                        syncBackGround();
                                     });
                                 }
                                 
@@ -322,33 +335,19 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
              try{
                 rootScope.$emit("BUSY"); 
                 // check network and server.
-                var syncTimes = 0;
-                var syncBackGround = function(){
-                    syncTimes ++;
-                    if(Auth.checkNetworkConnected()){
-                        DBSync.runInBackGround(function(){
-                            setTimeout(function(){
-                                console.log('sync times:'+syncTimes);
-                                syncBackGround();
-                            },10*60*1000);
-                        });
-                    }else{
-                        setTimeout(function(){
-                            console.log('sync times:'+syncTimes);
-                            syncBackGround();
-                        },60000);
-                    }
-                }
+               
                 if(Auth.isCachedAuthentication()){
                     $rootScope.$emit("NOTBUSY");
                     app.slidingMenu.setSwipeable(true); 
                     app.slidingMenu.setMainPage('pages/landingpage.html');
                     var user = JSON.parse(Auth.getCachedAuthentication());
                     AKHB.user = user;
-                    DBSync.runInBackGround(function(err){
-                        //$rootScope.$emit("BUSY");
+
+                    setTimeout(function(){
+                        console.log('sync times:'+syncTimes);
                         syncBackGround();
-                    });
+                    },AKHB.config.synctimer);
+
                 }else{
                     Auth.checkNetworkConnected();
                     onlineLogin();

@@ -39,14 +39,7 @@ AKHB.services.db.prototype.setTableLastUpdateTime = function(tx,tableName,lastUp
 		}else{
 			result.lastUpdatetime = lastUpdatetime;
 		}
-		if(!tx){
-			persistence.flush(function() {
-			  callback(false);
-			});
-		}else{
-			callback(false);
-		}
-		
+		callback(false);
 	});
 };
 
@@ -418,7 +411,7 @@ AKHB.services.db.prototype.setDirectories = function(model,remoteAddress,callbac
 			data = JSON.parse(data);
 		}catch(ex){
 			//console.log(data);
-			callback(nul);
+			callback(null);
 			return;
 		}
 		async.each(data.content,function(item,itemCallback){

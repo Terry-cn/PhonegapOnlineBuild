@@ -307,11 +307,11 @@ AKHB.services.db.DBSync =  (function(){
 			
 		}
 		this.syncCommittees = function(callback,tx){
-
+			var requestData = null;
 			async.waterfall([
 						function(callback){
 							dbServices.getTableLastUpdateTime('committees',function(err,result){
-								var requestData = Request('committees',AKHB.user,getLastModified(result));
+								requestData = Request('committees',AKHB.user,getLastModified(result));
 								var url = remoteAddress+'/webservice.php?'+ decodeURIComponent($.param(requestData));
 								callback(null,url);
 							});
@@ -325,7 +325,7 @@ AKHB.services.db.DBSync =  (function(){
 							if(result.response == 1){    
 								var lastModified;
 								async.each(result.content,function(committe,callback){
-									committe.last_modified_date = result.last_modified;
+									committe.last_modified_date = requestData.last_content_synced;
 									try{
 										dbServices.setCommitte(true,committe,remoteAddress,callback);
 									}catch(err){
@@ -333,14 +333,14 @@ AKHB.services.db.DBSync =  (function(){
 										callback(err);
 									}
 								},function(err){
-									callback(null,result.content.length,result.last_modified_date );
+									callback(null,result.content.length,result.last_modified );
 								});
 							}else{
-								callback(null,0,result.last_modified_date );
+								callback(null,0,result.last_modified );
 							}
 						},function(affectCount,lastModified,callback){
 							dbServices.setTableLastUpdateTime(true,'committees',lastModified,function(result){
-								console.log('updated committees last_modified_date');
+								console.log('updated committees last_modified_date',lastModified);
 								callback(false,result,affectCount);
 							})
 						}
