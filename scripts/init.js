@@ -526,7 +526,14 @@ module.controller('ContentController',['$scope','$http','$templateCache','$sce',
 
 module.controller('DirectoryController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
-
+        
+        var timer = null;
+        var sec = 500;
+        $scope.loaddata = false;
+        $scope.directories = [];
+        $scope.emptySearch = true;
+        $scope.nodata  = false;
+        
         $scope.OpenDirectoryPage = function($event,type){
             var dict = {
                 title : $($event.target).text(),
@@ -546,21 +553,12 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
             });
 
         }
-        console.log("getDirectoryCategories");
         DB.getDirectoryCategories(function(err,data){
             console.log("getDirectoryCategories",data);
             $scope.$apply(function(){
                 $scope.categories = data;
             });
         })
-
-
-        var timer = null;
-        var sec = 500;
-        $scope.loaddata = false;
-        $scope.directories = [];
-        $scope.emptySearch = true;
-        $scope.nodata  = false;
 
         $scope.OpenDirectoryDetail = function(directory){
             $templateCache.put('directory',directory);
