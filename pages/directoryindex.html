@@ -13,7 +13,7 @@
       </div>
     </div>  
     <ons-list>
-        <ons-list-item ng-show="emptySearch"  ng-repeat="cate in categories"  modifier="chevron" ng-click="OpenDirectoryPage($event,cate)">
+        <ons-list-item   ng-repeat="cate in categories"  modifier="chevron" ng-click="OpenDirectoryPage($event,cate)">
         {{cate.title}}
         </ons-list-item>
         <ons-list-item  ng-show="loaddata" style="padding: 0;height: 100%; ">
