@@ -80,13 +80,7 @@ AKHB.services.db.DBSync =  (function(){
 								console.log("Sync articles success.");
 								if(callback && typeof callback == 'function') callback(null,result);
 							}
-							if(tx || persistence.flushHooks.length == 0){
-								syncSuccess();
-							}else{
-								persistence.flush(null,function() {
-								  syncSuccess();
-								});
-							}
+							syncSuccess();
 							
 						}
 				});
@@ -149,7 +143,7 @@ AKHB.services.db.DBSync =  (function(){
 							function syncSuccess(){
 								console.log("Sync messages success.");
 								dbServices.getLatestActiveMessage(function(err,messsage){
-									console.log(messsage);
+									console.log('getLatestActiveMessage',messsage);
 									if(messsage){
 										AKHB.notification.alert(messsage.content,function(){
 											messsage.read = 1;
@@ -163,14 +157,8 @@ AKHB.services.db.DBSync =  (function(){
 									
 								});
 							}
-							if(tx || persistence.flushHooks.length == 0){
-								syncSuccess();
-							}else{
-								persistence.flush(null,function() {
-								  syncSuccess();
-								});
-							}
-							
+							//syncSuccess();
+							callback(null);
 						}
 				});
 			}catch(ex){
@@ -225,13 +213,7 @@ AKHB.services.db.DBSync =  (function(){
 								console.log("Sync navigation success.");
 								if(callback && typeof callback == 'function') callback(null,result);
 							}
-							if(tx || persistence.flushHooks.length == 0){
-								syncSuccess();
-							}else{
-								persistence.flush(null,function() {
-								  syncSuccess();
-								});
-							}
+							syncSuccess();
 						}
 				});
 			
@@ -295,13 +277,7 @@ AKHB.services.db.DBSync =  (function(){
 								console.log("Sync directory success.");
 								if(callback && typeof callback == 'function') callback(null,result);
 							}
-							if(tx || persistence.flushHooks.length == 0){
-								syncSuccess();
-							}else{
-								persistence.flush(null,function() {
-								  syncSuccess();
-								});
-							}
+							syncSuccess();
 						}
 				});
 			
@@ -353,13 +329,7 @@ AKHB.services.db.DBSync =  (function(){
 								console.log("Sync last_modified_date success.");
 								if(callback && typeof callback == 'function') callback(null,result);
 							}
-							if(tx || persistence.flushHooks.length == 0){
-								syncSuccess();
-							}else{
-								persistence.flush(null,function() {
-								  syncSuccess();
-								});
-							}
+							syncSuccess();
 						}
 				});
 			
