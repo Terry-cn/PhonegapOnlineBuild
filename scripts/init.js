@@ -546,7 +546,7 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
                     myNavigator.pushPage('pages/directorylist.html');    
                 }else{
                     AKHB.notification.alert("No directory data.",function(){
-                        //AKHB.utils.exitApp();
+                        AKHB.utils.exitApp();
                     });
                 }
                 

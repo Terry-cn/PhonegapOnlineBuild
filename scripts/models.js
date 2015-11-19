@@ -80,6 +80,7 @@ var committees =  persistence.define('committees', {
     email :"TEXT",
     status :"INT",
     last_modified:"DATE",
+    content:"JSON"
 });
 
 //directory.index(['title','category_id']);

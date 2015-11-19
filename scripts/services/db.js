@@ -210,9 +210,10 @@ AKHB.services.db.prototype.getCommitteById = function(id,callback){
 
 AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,callback){
 	var that = this;
+	var dbCommitte = null;
 	this.getCommitteById(_committe.id,function(err,resultCommitte){
 		if(!resultCommitte){
-			var _mCommitte = new committees({
+			dbCommitte = new committees({
 				server_id:_committe.id,
 			    inst_type :_committe.inst_type,
 			    category :_committe.category,
@@ -220,23 +221,24 @@ AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,cal
 			    description :_committe.description,
 			    email :_committe.email,
 			    status :_committe.status,
-			    last_modified:_committe.last_modified_date
+			    last_modified:moment(_committe.last_modified).toDate()
 			});
-			persistence.add(_mCommitte);
+			persistence.add(dbCommitte);
 		}else{
 			if(_committe.status == 1){
 				persistence.remove(resultCommitte);
 			}else{
-				resultCommitte.title = _committe.title;
-				resultCommitte.last_modified = moment(_committe.last_modified_date).toDate();
-				resultCommitte.inst_type = _committe.inst_type;
-				resultCommitte.status = _committe.status;
-				resultCommitte.category = _committe.category;
-				resultCommitte.description = _committe.description;
-				resultCommitte.email = _committe.email;
+				dbCommitte = resultCommitte;
+				dbCommitte.title = _committe.title;
+				dbCommitte.last_modified = moment(_committe.last_modified).toDate();
+				dbCommitte.inst_type = _committe.inst_type;
+				dbCommitte.status = _committe.status;
+				dbCommitte.category = _committe.category;
+				dbCommitte.description = _committe.description;
+				dbCommitte.email = _committe.email;
 			}
 		}
-		that.setDirectories(_committe,remoteAddress,function(err){
+		that.setDirectories(dbCommitte,_committe.last_modified_date,remoteAddress,function(err){
 			callback(err);
 		});
 	});
@@ -393,28 +395,28 @@ AKHB.services.db.prototype.setDirectoryCategories = function(model,callback){
 		}
 	})
 }
-AKHB.services.db.prototype.setDirectories = function(model,remoteAddress,callback){
+AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteAddress,callback){
 	var that = this;
 	var url = remoteAddress+'/webservice.php?type=2&table=directory';
-	url+='&id='+model.id;
+	url+='&id='+model.server_id;
 	url+='&inst_type='+model.inst_type;
-	url+='&last_content_synced='+model.last_modified_date;
+	url+='&last_content_synced='+last_modified;
 
-	$.get(url,function(data){
-		try{
-			data = JSON.parse(data);
-		}catch(ex){
-			//console.log(data);
+	setTimeout(function(){
+		$.get(url,function(data){
+			try{
+				data = JSON.parse(data);
+			}catch(ex){
+				//console.log(data);
+				callback(null);
+				return;
+			}
+			model.content = data.content;
 			callback(null);
-			return;
-		}
-		async.each(data.content,function(item,itemCallback){
-			itemCallback();
-		},function(err){
-			callback(err);
-		});
-	})
-	
+		})
+
+	},200);
+		
 };
 AKHB.services.db.prototype.setDirectory = function(model,id,callback){
 
