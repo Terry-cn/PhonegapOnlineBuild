@@ -147,12 +147,12 @@ AKHB.services.db.DBSync =  (function(){
 									if(messsage){
 										AKHB.notification.alert(messsage.content,function(){
 											messsage.read = 1;
-											persistence.flush(null,function() {
-												if(callback && typeof callback == 'function') callback(null,result);
-											});
+											if(callback && typeof callback == 'function') 
+												callback(null,result);
 										},messsage.title);
 									}else{
-										if(callback && typeof callback == 'function') callback(null,result);
+										if(callback && typeof callback == 'function') 
+											callback(null,result);
 									}
 									
 								});

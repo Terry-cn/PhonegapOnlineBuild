@@ -237,13 +237,7 @@ AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,cal
 			}
 		}
 		that.setDirectories(_committe,remoteAddress,function(err){
-			if(!tx){
-				persistence.flush(function() {
-				  callback(false);
-				});
-			}else{
-				callback(false);
-			}
+			callback(err);
 		});
 	});
 };
@@ -405,25 +399,24 @@ AKHB.services.db.prototype.setDirectories = function(model,remoteAddress,callbac
 	url+='&id='+model.id;
 	url+='&inst_type='+model.inst_type;
 	url+='&last_content_synced='+model.last_modified_date;
-	callback();
-	// $.get(url,function(data){
-	// 	try{
-	// 		data = JSON.parse(data);
-	// 	}catch(ex){
-	// 		//console.log(data);
-	// 		callback(null);
-	// 		return;
-	// 	}
-	// 	async.each(data.content,function(item,itemCallback){
-	// 		itemCallback();
-	// 	},function(err){
-	// 		callback(err);
-	// 	});
-	// })
+
+	$.get(url,function(data){
+		try{
+			data = JSON.parse(data);
+		}catch(ex){
+			//console.log(data);
+			callback(null);
+			return;
+		}
+		async.each(data.content,function(item,itemCallback){
+			itemCallback();
+		},function(err){
+			callback(err);
+		});
+	})
 	
 };
 AKHB.services.db.prototype.setDirectory = function(model,id,callback){
-	
 
 	this.getDirectoryById(model.id,function(err,localModel){
 		if(err ||  !localModel){
