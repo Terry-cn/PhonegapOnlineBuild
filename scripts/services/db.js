@@ -238,9 +238,8 @@ AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,cal
 				dbCommitte.email = _committe.email;
 			}
 		}
-		that.setDirectories(dbCommitte,_committe.last_modified_date,remoteAddress,function(err){
-			callback(err);
-		});
+		that.setDirectories(dbCommitte,_committe.last_modified_date,remoteAddress);
+		callback(err);
 	});
 };
 
@@ -395,7 +394,7 @@ AKHB.services.db.prototype.setDirectoryCategories = function(model,callback){
 		}
 	})
 }
-AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteAddress,callback){
+AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteAddress){
 	var that = this;
 	var url = remoteAddress+'/webservice.php?type=2&table=directory';
 	url+='&id='+model.server_id;
@@ -407,12 +406,10 @@ AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteA
 			try{
 				data = JSON.parse(data);
 			}catch(ex){
-				//console.log(data);
-				callback(null);
+				console.log(ex);
 				return;
 			}
 			model.content = data.content;
-			callback(null);
 		})
 
 	},200);
