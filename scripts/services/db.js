@@ -418,7 +418,7 @@ AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteA
 				console.log(ex);
 				return;
 			}
-			model.content = data.content;
+			model.content = JSON.stringify(data.content);
 		})
 
 	},200);

@@ -467,6 +467,7 @@ module.controller('ContentController',['$scope','$http','$templateCache','$sce',
             if(!Auth.isNetworkConnected()){
                 $scope.contentHTML = $sce.trustAsHtml("<p class=empty-content>"+MSG_RETUIREDNETWORK.content+"</p>");
             }else{
+                article.content = article.content.replace(/<[^>]+>/g,"");
                 if(article.content.toLowerCase().indexOf('http') == -1) 
                     article.content = 'http://'+article.content;
                 
@@ -618,7 +619,9 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
  
             DB.getDirectoriesPagnation($scope.dict.type,index,function(err,data){
                 $scope.$apply(function(){
-                    if(data.length > 0) itemScope.item = data[0];
+                    if(data.length > 0) {
+                        itemScope.item = data[0];
+                    }
                 })
                 
              });
@@ -638,7 +641,8 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
 module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.directory = $templateCache.get('directory');
-        $scope.directory.content = JSON.parse($scope.directory.content);
+        if(typeof $scope.directory.content == 'string')
+            $scope.directory.content = JSON.parse($scope.directory.content);
         // $scope.directory.members = JSON.parse($scope.directory.members);
         $scope.openDescription = function(directory){
             $templateCache.put('directory',directory);
