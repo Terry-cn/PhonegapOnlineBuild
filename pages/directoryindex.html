@@ -7,9 +7,12 @@
         <div class="right">
         </div>
     </ons-toolbar>
-    <div class="navigation-bar">
+    <div class="navigation-bar search-bar">
         <div class="navigation-bar__center" style="margin: 0px;">
         <input type="search" class="search-input" style="width: 96%; margin: 6px auto 6px auto;" placeholder="Search" ng-model="key" ng-change="triggerSearch()">
+        <a ng-show="!emptySearch" class="btn-empty-search" href="javascript:void(0)" ng-click="clearInput()">
+          <i class="fa fa-times"></i>
+        </a>
       </div>
     </div>  
     <ons-list style="width:100%;">
@@ -33,7 +36,7 @@
           <ons-list-item class="person" ng-show="nodata">
             <ons-row>
               <ons-col class="person-name" >
-                Not found results.
+                No results found.
               </ons-col>
             </ons-row>
           </ons-list-item>

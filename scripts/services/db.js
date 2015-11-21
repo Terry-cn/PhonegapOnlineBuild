@@ -353,6 +353,15 @@ AKHB.services.db.prototype.getDirectoryById = function(id,callback){
 		callback(null,data);
 	})
 };
+
+AKHB.services.db.prototype.getCommitteById = function(id,callback){
+	var directories = committees.all().filter('server_id','=',id);
+	directories.one(function(data){
+		callback(null,data);
+	})
+};
+
+
 AKHB.services.db.prototype.getDirectoryCategories = function(callback){
 
 
@@ -465,10 +474,25 @@ AKHB.services.db.prototype.getDirectoriesPagnation = function(category,page,call
 	})
 };
 AKHB.services.db.prototype.searchDirectories = function(key,callback){
-	var directories = committees.all().filter('title','like','%'+key+'%').order('title',true).limit(20);
+	var directories = committees.all()
+	.filter('content','like','%'+key+'%')
+	.or(new persistence.PropertyFilter('title','like','%'+key+'%'))
+	.order('title',true).limit(20);
 	directories.list(function(data){
 		callback(null,data);
 	})
+	// persistence.transaction(function(tx){
+	// 	key = key.replace(/'/g,'\\\'');
+	// 	tx.executeSql('select id from committees where title like \'%'+key+'%\' or content like \'%'+key+'%\' order by title asc limit 20 ;',
+	// 		null,
+	// 		function(data){
+	// 			console.log(data);
+	// 			callback(null,data);
+	// 		},
+	// 		function(err){
+	// 			console.log(err);
+	// 		});
+	// })
 };
 AKHB.services.db.prototype.getDirectoriesCount = function(category,callback){
 	var directories = committees.all().filter('inst_type','=',category);

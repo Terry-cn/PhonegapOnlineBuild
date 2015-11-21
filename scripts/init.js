@@ -106,8 +106,8 @@ module.controller('SlidingMenuController',['$scope',function($scope){
 }]);
 module.controller('LandingPageController',['$scope','$sce','$templateCache',function($scope,$sce,$templateCache){
     var scope = $scope;
-
-     $scope.openPage = function(nav){
+    app.slidingMenu.setSwipeable(true); 
+    $scope.openPage = function(nav){
         $templateCache.put('navigation',nav);
         if(nav.type==2){
             AKHB.openContentPage(nav,$templateCache);
@@ -321,7 +321,6 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                                     
                                     syncBackGround(function(){
                                         rootScope.$emit("NOTBUSY");
-                                        app.slidingMenu.setSwipeable(true);
                                         app.slidingMenu.setMainPage('pages/landingpage.html');
                                     });
                                 }
@@ -338,7 +337,6 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                
                 if(Auth.isCachedAuthentication()){
                     $rootScope.$emit("NOTBUSY");
-                    app.slidingMenu.setSwipeable(true); 
                     app.slidingMenu.setMainPage('pages/landingpage.html');
                     var user = JSON.parse(Auth.getCachedAuthentication());
                     AKHB.user = user;
@@ -372,7 +370,6 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
 module.controller('MenuController',['$scope','$http','$templateCache',
     function($scope, $http, $templateCache) {
         //console.log('MenuController',$scope.$id);
-        app.slidingMenu.setSwipeable(true); 
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
 
@@ -426,7 +423,6 @@ module.controller('ChildMenuController',['$scope','$http','$templateCache','$sce
         $scope.navigation = $templateCache.get('navigation');
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
-            app.slidingMenu.setSwipeable(true); 
             if(nav.type==2){
                 AKHB.openContentPage(nav,$templateCache);
             }else{
@@ -534,6 +530,12 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
         $scope.emptySearch = true;
         $scope.nodata  = false;
         
+        $scope.clearInput = function(){
+            $scope.key = '';
+            $scope.emptySearch = true;
+            $scope.nodata  = false;  
+            $scope.directories = [];
+        }
         $scope.OpenDirectoryPage = function($event,type){
             var dict = {
                 title : $($event.target).text(),
@@ -636,6 +638,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
 module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.directory = $templateCache.get('directory');
+        $scope.directory.content = JSON.parse($scope.directory.content);
         // $scope.directory.members = JSON.parse($scope.directory.members);
         $scope.openDescription = function(directory){
             $templateCache.put('directory',directory);
@@ -650,9 +653,16 @@ module.controller('DirectoryIndividualController',['$scope','$rootScope','$http'
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.individual = $templateCache.get('individual');
 
-        $scope.openIndividual = function(individual){
-            $templateCache.put('individual',individual);
-            myNavigator.pushPage('pages/directoryindividual.html');
+        $scope.OpenCommittees = function(committe){
+            DB.getCommitteById(committe.id,function(err,data){
+                if(data){
+                    $templateCache.put('directory',data);
+                    myNavigator.pushPage('pages/directorydetail.html');    
+                }   else{
+                    $templateCache.put('individual',null);
+                    myNavigator.pushPage('pages/directoryindividual.html');
+                }
+            })
         };
 }]);
 module.controller('DirectoryDescriptionController',['$scope','$rootScope','$http','$templateCache','$sce',
