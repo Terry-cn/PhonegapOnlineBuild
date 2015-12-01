@@ -8,8 +8,8 @@
         </div>
     </ons-toolbar>
     <ons-list>
-        <ons-list-header>Committee</ons-list-header>
-        <ons-list-item>
+        <ons-list-header ng-show="directory.description">Committee</ons-list-header>
+        <ons-list-item ng-show="directory.description">
             <p>{{directory.description}}</p>
         </ons-list-item>
         <ons-list-header ng-repeat-start="member in directory.members">{{member.role}}</ons-list-header>

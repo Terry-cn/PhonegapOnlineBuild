@@ -46,6 +46,7 @@ AKHB.services.authentication = (function(){
 			return navigator.network && navigator.network.connection && navigator.network.connection.type != Connection.NONE;
 		};
 		this.isWebserviceWorking = function($http,callback){
+			console.log('isWebserviceWorking',appConfig.remoteAddress + '/webservice.php')
 			$http({
 				url:appConfig.remoteAddress + '/webservice.php',
 				timeout:appConfig.timeout,
