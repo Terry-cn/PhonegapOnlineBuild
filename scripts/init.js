@@ -713,9 +713,10 @@ $(document).on('touchstart touchend','#list-message',function(e){
     app.slidingMenu.setSwipeable(false); 
     e.stopPropagation();
     e.preventDefault();
-    setTimeout(function(){
+    if(window.swipTimer) clearTimeout(window.swipTimer);
+    window.swipTimer = setTimeout(function(){
         app.slidingMenu.setSwipeable(true); 
-    },1000);
+    },2000);
 })
 
 $(document).on('click','a',function(e){

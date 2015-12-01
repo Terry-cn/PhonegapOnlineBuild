@@ -182,15 +182,15 @@ ons-list-item.swipe{
 #list-message ons-list-item.show-del-btn{
 	-webkit-transform: translateX(-30%);   
    	transform: translateX(-30%);
-   	-webkit-transition:0.5s all ease;
-   	transition:0.5s all ease;
+   	-webkit-transition:0.2s all ease;
+   	transition:0.2s all ease;
 }
 
 #list-message ons-list-item{
 	-webkit-transform: translateX(-0%);   
    	transform: translateX(-0%);
-   	-webkit-transition:0.5s all ease;
-   	transition:0.5s all ease;
+   	-webkit-transition:0.2s all ease;
+   	transition:0.2s all ease;
 }
 .col-delete{
 	color:#fff;display:-webkit-box;-webkit-box-pack:center; background:#394295; text-align: center;-webkit-box-pack: center; text-align: center; -webkit-box-flex: 0; -webkit-box-align: center; -webkit-box-direction: inherit;
