@@ -65,7 +65,11 @@ AKHB.notification.alert = function(message,callback,title){
 		    'Done'              // buttonName
 		);
 	}else{
-		alert(message);
+		ons.notification.alert({
+		    messageHTML:message
+		 });
 		if(typeof callback == 'function') callback();
 	}
+
+
 };
