@@ -227,22 +227,22 @@ AKHB.services.db.DBSync =  (function(){
 								requestData.type = 5;
 
 								var url = remoteAddress+'/webservice.php?'+ decodeURIComponent($.param(requestData));
-								callback(null,url);
+								callback(null,url,requestData.last_content_synced);
 							});
 						},
-						function(url,callback){
+						function(url,last_content_synced,callback){
 							$.getJSON(url,function(result){
-								callback(false,result)
+								callback(false,result,last_content_synced)
 							});
 						},
-						function(result,callback){
+						function(result,last_content_synced,callback){
 							if(result.response == 1){    
 								var lastModified;
 								//async.each(result,function(directory,callback){
 								async.each(result.content,function(directory,callback){
 									
 									try{
-										dbServices.setDirectoryCategories(directory,function(err){
+										dbServices.setDirectoryCategories(directory,remoteAddress,last_content_synced,function(err){
 											if(!err) {
 												callback(null,result.content.length,result.last_modified);
 												return;
@@ -283,11 +283,11 @@ AKHB.services.db.DBSync =  (function(){
 			
 		}
 		this.syncCommittees = function(callback,tx){
-
+			var requestData;
 			async.waterfall([
 						function(callback){
 							dbServices.getTableLastUpdateTime('committees',function(err,result){
-								var requestData = Request('committees',AKHB.user,getLastModified(result));
+								requestData = Request('committees',AKHB.user,getLastModified(result));
 								var url = remoteAddress+'/webservice.php?'+ decodeURIComponent($.param(requestData));
 								callback(null,url);
 							});
@@ -301,7 +301,7 @@ AKHB.services.db.DBSync =  (function(){
 							if(result.response == 1){    
 								var lastModified;
 								async.each(result.content,function(committe,callback){
-									committe.last_modified_date = result.last_modified;
+									committe.last_content_synced = requestData.last_content_synced;
 									try{
 										dbServices.setCommitte(true,committe,remoteAddress,callback);
 									}catch(err){

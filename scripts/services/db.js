@@ -39,14 +39,7 @@ AKHB.services.db.prototype.setTableLastUpdateTime = function(tx,tableName,lastUp
 		}else{
 			result.lastUpdatetime = lastUpdatetime;
 		}
-		if(!tx){
-			persistence.flush(function() {
-			  callback(false);
-			});
-		}else{
-			callback(false);
-		}
-		
+		callback(false);
 	});
 };
 
@@ -217,9 +210,10 @@ AKHB.services.db.prototype.getCommitteById = function(id,callback){
 
 AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,callback){
 	var that = this;
+	var dbCommitte = null;
 	this.getCommitteById(_committe.id,function(err,resultCommitte){
 		if(!resultCommitte){
-			var _mCommitte = new committees({
+			dbCommitte = new committees({
 				server_id:_committe.id,
 			    inst_type :_committe.inst_type,
 			    category :_committe.category,
@@ -227,31 +221,25 @@ AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,cal
 			    description :_committe.description,
 			    email :_committe.email,
 			    status :_committe.status,
-			    last_modified:_committe.last_modified_date
+			    last_modified:moment(_committe.last_modified).toDate()
 			});
-			persistence.add(_mCommitte);
+			persistence.add(dbCommitte);
 		}else{
 			if(_committe.status == 1){
 				persistence.remove(resultCommitte);
 			}else{
-				resultCommitte.title = _committe.title;
-				resultCommitte.last_modified = moment(_committe.last_modified_date).toDate();
-				resultCommitte.inst_type = _committe.inst_type;
-				resultCommitte.status = _committe.status;
-				resultCommitte.category = _committe.category;
-				resultCommitte.description = _committe.description;
-				resultCommitte.email = _committe.email;
+				dbCommitte = resultCommitte;
+				dbCommitte.title = _committe.title;
+				dbCommitte.last_modified = moment(_committe.last_modified).toDate();
+				dbCommitte.inst_type = _committe.inst_type;
+				dbCommitte.status = _committe.status;
+				dbCommitte.category = _committe.category;
+				dbCommitte.description = _committe.description;
+				dbCommitte.email = _committe.email;
 			}
 		}
-		that.setDirectories(_committe,remoteAddress,function(err){
-			if(!tx){
-				persistence.flush(function() {
-				  callback(false);
-				});
-			}else{
-				callback(false);
-			}
-		});
+		that.setDirectories(dbCommitte,_committe.last_content_synced,remoteAddress);
+		callback(err);
 	});
 };
 
@@ -281,7 +269,7 @@ AKHB.services.db.prototype.getHomepageIcons = function(callback){
 
 AKHB.services.db.prototype.getMessages = function(callback){
 	var mMessages = message.all();
-	mMessages.filter('status','=','0')
+	mMessages.filter('status','<','2')
 	.order('type',true)
 	.order('server_id',false)
 	.list(null,function(messages){
@@ -290,8 +278,7 @@ AKHB.services.db.prototype.getMessages = function(callback){
 };
 AKHB.services.db.prototype.getMessageCount = function(callback){
 	var mMessages = message.all();
-	mMessages.filter('read','=','0')
-	.and(new persistence.PropertyFilter('status','=','0'))
+	mMessages.filter('status','<','2')
 	.count(null,function(count){
 		callback(false,count);
 	});
@@ -317,12 +304,9 @@ AKHB.services.db.prototype.getLatestActiveMessage = function(callback){
 	})
 };
 AKHB.services.db.prototype.deleteMessage = function(id,callback){
-console.log("deleteMessage",id);
 	var mMessages = message.all().filter('server_id','=',id);
 	mMessages.one(null,function(message){
-		console.log(message.sataus);
-		message.status = 1;
-		console.log(message.sataus);
+		message.status = 2;
 		persistence.flush(function() {
 		 	callback(false,message);
 		});
@@ -365,6 +349,15 @@ AKHB.services.db.prototype.getDirectoryById = function(id,callback){
 		callback(null,data);
 	})
 };
+
+AKHB.services.db.prototype.getCommitteById = function(id,callback){
+	var directories = committees.all().filter('server_id','=',id);
+	directories.one(function(data){
+		callback(null,data);
+	})
+};
+
+
 AKHB.services.db.prototype.getDirectoryCategories = function(callback){
 
 
@@ -380,8 +373,9 @@ AKHB.services.db.prototype.getDirectoryCategories = function(callback){
 	})
 
 };
-AKHB.services.db.prototype.setDirectoryCategories = function(model,callback){
+AKHB.services.db.prototype.setDirectoryCategories = function(model,remoteAddress,last_content_synced,callback){
 	var that = this;
+	debugger
 	var _category = category.all().filter('type','=',model.type);
 	_category.one(function(dbCategory){
 		if(dbCategory == null){
@@ -391,50 +385,42 @@ AKHB.services.db.prototype.setDirectoryCategories = function(model,callback){
 			    status :model.status
 			});
 			persistence.add(_directoryCategory);
-			console.log("set _directoryCategory:",_directoryCategory);
-			that.setDirectories(model,_directoryCategory,callback);
+			that.setDirectories(model,last_content_synced,_directoryCategory,remoteAddress,callback);
 			
 		}else{
 			if(model.last_modified > dbCategory.last_modified){
 				dbCategory.last_modified = model.last_modified;
 				dbCategory.title = model.title;
 				dbCategory.status = model.status;
-				that.setDirectories(model,dbCategory,callback);
+				that.setDirectories(model,last_content_synced,dbCategory,remoteAddress,callback);
 			}else{
 				callback(null);
 			}
 		}
 	})
 }
-AKHB.services.db.prototype.setDirectories = function(model,remoteAddress,callback){
+AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteAddress){
 	var that = this;
 	var url = remoteAddress+'/webservice.php?type=2&table=directory';
-	url+='&id='+model.id;
+	url+='&id='+model.server_id;
 	url+='&inst_type='+model.inst_type;
-	url+='&last_content_synced='+model.last_modified_date;
+	url+='&last_content_synced='+last_modified;
 
-	$.get(url,function(data){
-		try{
-			data = JSON.parse(data);
-		}catch(ex){
-			//console.log(data);
-			callback(nul);
-			return;
-		}
-		if(!data.content){
-			callback(null);
-			return;
-		}
-		async.each(data.content,function(item,itemCallback){
-			itemCallback();
-		},function(err){
-			callback(err);
-		});
-	})
-	
+	setTimeout(function(){
+		$.get(url,function(data){
+			try{
+				data = JSON.parse(data);
+			}catch(ex){
+				console.log(ex);
+				return;
+			}
+			if(data.content) model.content = JSON.stringify(data.content);
+		})
+
+	},200);
+		
 };
 AKHB.services.db.prototype.setDirectory = function(model,id,callback){
-	
 
 	this.getDirectoryById(model.id,function(err,localModel){
 		if(err ||  !localModel){
@@ -484,10 +470,25 @@ AKHB.services.db.prototype.getDirectoriesPagnation = function(category,page,call
 	})
 };
 AKHB.services.db.prototype.searchDirectories = function(key,callback){
-	var directories = committees.all().filter('title','like','%'+key+'%').order('title',true).limit(20);
+	var directories = committees.all()
+	.filter('content','like','%'+key+'%')
+	.or(new persistence.PropertyFilter('title','like','%'+key+'%'))
+	.order('title',true).limit(20);
 	directories.list(function(data){
 		callback(null,data);
 	})
+	// persistence.transaction(function(tx){
+	// 	key = key.replace(/'/g,'\\\'');
+	// 	tx.executeSql('select id from committees where title like \'%'+key+'%\' or content like \'%'+key+'%\' order by title asc limit 20 ;',
+	// 		null,
+	// 		function(data){
+	// 			console.log(data);
+	// 			callback(null,data);
+	// 		},
+	// 		function(err){
+	// 			console.log(err);
+	// 		});
+	// })
 };
 AKHB.services.db.prototype.getDirectoriesCount = function(category,callback){
 	var directories = committees.all().filter('inst_type','=',category);

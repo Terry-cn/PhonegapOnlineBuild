@@ -158,8 +158,6 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
         // });
     };
     scope.openMessageDetail = function(msg){
-        console.log(msg);
-        msg.type = 2;
         // if(msg.type == 1){
         //     DB.setMessageUsed(msg.server_id,function(err,result){
         //         msg.type = 2;
@@ -224,9 +222,9 @@ module.controller('MessageDetailController',['$scope','$rootScope','$http','$tem
         var scope = $scope;
         var message = $templateCache.get('message');
         $scope.message = message;
-        message.read = 1;
-        DB.setUsage(message.server_id,2);
-
+        message.status = 1;
+        DB.setUsage(message.server_id,1);
+        persistence.flush();
         
         $scope.deleteMessage = function(){
             ons.notification.confirm({
@@ -234,6 +232,7 @@ module.controller('MessageDetailController',['$scope','$rootScope','$http','$tem
                 callback: function(answer) {
                   if(answer){
                     DB.deleteMessage(message.server_id,function(){
+                        DB.setUsage(message.server_id,2);
                         $rootScope.$broadcast("Refresh");
                         myNavigator.popPage();
                     });
@@ -642,11 +641,9 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
 module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.directory = $templateCache.get('directory');
-        // $scope.directory.members = JSON.parse($scope.directory.members);
-        $scope.openDescription = function(directory){
-            $templateCache.put('directory',directory);
-            myNavigator.pushPage('pages/directorydescription.html');
-        };
+        if(typeof $scope.directory.members == "undefined")
+            $scope.directory.members = JSON.parse($scope.directory.content);
+
         $scope.openIndividual = function(individual){
             $templateCache.put('individual',individual);
             myNavigator.pushPage('pages/directoryindividual.html');
@@ -657,8 +654,17 @@ module.controller('DirectoryIndividualController',['$scope','$rootScope','$http'
         $scope.individual = $templateCache.get('individual');
 
         $scope.openIndividual = function(individual){
-            $templateCache.put('individual',individual);
-            myNavigator.pushPage('pages/directoryindividual.html');
+
+            DB.getCommitteById(individual.id,function(err,data){
+                if(!err && data){
+                    $templateCache.put('directory',data);
+                    myNavigator.pushPage('pages/directorydetail.html');
+                }else{
+                    $templateCache.put('individual',individual);
+                    myNavigator.pushPage('pages/directoryindividual.html');
+                }
+            })
+            
         };
 }]);
 module.controller('DirectoryDescriptionController',['$scope','$rootScope','$http','$templateCache','$sce',

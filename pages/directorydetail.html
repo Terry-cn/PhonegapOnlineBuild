@@ -8,9 +8,9 @@
         </div>
     </ons-toolbar>
     <ons-list>
-        <ons-list-header>BackGround</ons-list-header>
-        <ons-list-item ng-click="openDescription(dict)">
-        Description
+        <ons-list-header>Committee</ons-list-header>
+        <ons-list-item>
+            <p>{{directory.description}}</p>
         </ons-list-item>
         <ons-list-header ng-repeat-start="member in directory.members">{{member.role}}</ons-list-header>
         <ons-list-item ng-repeat-end ng-repeat="name in member.names" ng-click="openIndividual(name)">

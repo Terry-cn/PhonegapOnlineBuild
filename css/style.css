@@ -175,10 +175,7 @@ button.btn-msg-del{
 ons-list-item.swipe{
 	position: relative;
 }
-@keyframes slideleftout{
-	from{left:0; background:red;}
-	to{left:-30%; background:yellow;}
-}
+
 #list-message ons-list-item.show-del-btn{
 	-webkit-transform: translateX(-30%);   
    	transform: translateX(-30%);
@@ -232,4 +229,14 @@ span.Editeve{
  #login_container .login_content,.login_foot{
 	color:#fff;
 	text-align:  center;
+}
+
+ons-list-item p{
+	line-height: 120%;
+}
+.list-search{
+	height: 44px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
