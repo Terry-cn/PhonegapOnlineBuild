@@ -15,7 +15,7 @@
 }
 .landingPage_logo img{
 	width: 100px;
-	margin: 10px;
+/*	margin: 10px;*/
 }
 
 .articlesAndAd_Logo{
@@ -229,7 +229,31 @@ span.Editeve{
  #login_container .login_content,.login_foot{
 	color:#fff;
 	text-align:  center;
+	}
+
+.directory-description>p,.committees>p{
+    line-height: 160%;
+    margin: 10px;
 }
+.committees{
+    min-height: auto;
+}
+.committees>p{
+    min-height: auto;
+}
+.btn-empty-search{
+    width: 20px;
+    height: 20px;
+    display: block;
+    position: absolute;
+    right: 10px;
+    bottom: 23px;
+    color:#666;
+}
+.search-bar{
+    position: relative;
+}
+
 
 ons-list-item p{
 	line-height: 120%;
