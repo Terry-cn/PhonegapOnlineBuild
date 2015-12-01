@@ -8,11 +8,11 @@
         </div>
     </ons-toolbar>
     <ons-list>
-        <ons-list-header ng-show="directory.description">Background</ons-list-header>
-        <ons-list-item class="directory-description" ng-show="directory.description">
-        <p>{{directory.description}}</p>
+        <ons-list-header>BackGround</ons-list-header>
+        <ons-list-item ng-click="openDescription(dict)">
+        Description
         </ons-list-item>
-        <ons-list-header ng-repeat-start="member in directory.content">{{member.role}}</ons-list-header>
+        <ons-list-header ng-repeat-start="member in directory.members">{{member.role}}</ons-list-header>
         <ons-list-item ng-repeat-end ng-repeat="name in member.names" ng-click="openIndividual(name)">
         {{name.title}} {{name.forename}} {{name.Surname}}
         </ons-list-item>

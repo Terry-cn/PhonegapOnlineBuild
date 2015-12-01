@@ -106,8 +106,8 @@ module.controller('SlidingMenuController',['$scope',function($scope){
 }]);
 module.controller('LandingPageController',['$scope','$sce','$templateCache',function($scope,$sce,$templateCache){
     var scope = $scope;
-    app.slidingMenu.setSwipeable(true); 
-    $scope.openPage = function(nav){
+
+     $scope.openPage = function(nav){
         $templateCache.put('navigation',nav);
         if(nav.type==2){
             AKHB.openContentPage(nav,$templateCache);
@@ -189,16 +189,20 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
             target = $($event.target).parents('.swipe:eq(0)').get(0);
         }
         $(target).addClass('show-del-btn');
-        console.log(target);
     };
     $scope.swipeRight = function($event){
          var target = $($event.target);
+         if($event.target.tagName.toLowerCase() != 'ons-list-item'){
+            if($(target.parents('ons-list-item:eq(0)').get(0)).offset().left == 0){
+                app.slidingMenu.openMenu();
+                app.slidingMenu.setSwipeable(true);
+                return;
+            }
+         }
         if(!$($event.target).hasClass('swipe')){
             target = $($event.target).parents('.swipe:eq(0)').get(0);
         }
         $(target).removeClass('show-del-btn');
-        console.log(target);
-        console.log("swipeLeft");
     };
     $scope.deleteMessage = function(msg,$event){
         $event.stopPropagation();
@@ -284,20 +288,6 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
         });
         
         function initLogin(){
-             var syncTimes = 0;
-            var syncBackGround = function(callback){
-                syncTimes ++;
-                if(Auth.checkNetworkConnected()){
-                    DBSync.runInBackGround(function(){
-                        if(typeof callback == 'function') callback(); 
-                        setTimeout(function(){
-                            console.log('sync times:'+syncTimes);
-                            syncBackGround();
-                            
-                        },AKHB.config.synctimer);
-                    });
-                }
-            }
             var onlineLogin = function(){
                 Auth.isWebserviceWorking($http,function(err,result){
                     if(err){
@@ -319,9 +309,11 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                                 }
                                 else{
                                     
-                                    syncBackGround(function(){
+                                    DBSync.runInBackGround(function(err){
                                         rootScope.$emit("NOTBUSY");
+                                        app.slidingMenu.setSwipeable(true);
                                         app.slidingMenu.setMainPage('pages/landingpage.html');
+                                        syncBackGround();
                                     });
                                 }
                                 
@@ -334,18 +326,33 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
              try{
                 rootScope.$emit("BUSY"); 
                 // check network and server.
-               
+                var syncTimes = 0;
+                var syncBackGround = function(){
+                    syncTimes ++;
+                    if(Auth.checkNetworkConnected()){
+                        DBSync.runInBackGround(function(){
+                            setTimeout(function(){
+                                console.log('sync times:'+syncTimes);
+                                syncBackGround();
+                            },10*60*1000);
+                        });
+                    }else{
+                        setTimeout(function(){
+                            console.log('sync times:'+syncTimes);
+                            syncBackGround();
+                        },60000);
+                    }
+                }
                 if(Auth.isCachedAuthentication()){
                     $rootScope.$emit("NOTBUSY");
+                    app.slidingMenu.setSwipeable(true); 
                     app.slidingMenu.setMainPage('pages/landingpage.html');
                     var user = JSON.parse(Auth.getCachedAuthentication());
                     AKHB.user = user;
-
-                    setTimeout(function(){
-                        console.log('sync times:'+syncTimes);
+                    DBSync.runInBackGround(function(err){
+                        //$rootScope.$emit("BUSY");
                         syncBackGround();
-                    },AKHB.config.synctimer);
-
+                    });
                 }else{
                     Auth.checkNetworkConnected();
                     onlineLogin();
@@ -370,6 +377,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
 module.controller('MenuController',['$scope','$http','$templateCache',
     function($scope, $http, $templateCache) {
         //console.log('MenuController',$scope.$id);
+        app.slidingMenu.setSwipeable(true); 
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
 
@@ -423,6 +431,7 @@ module.controller('ChildMenuController',['$scope','$http','$templateCache','$sce
         $scope.navigation = $templateCache.get('navigation');
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
+            app.slidingMenu.setSwipeable(true); 
             if(nav.type==2){
                 AKHB.openContentPage(nav,$templateCache);
             }else{
@@ -467,7 +476,6 @@ module.controller('ContentController',['$scope','$http','$templateCache','$sce',
             if(!Auth.isNetworkConnected()){
                 $scope.contentHTML = $sce.trustAsHtml("<p class=empty-content>"+MSG_RETUIREDNETWORK.content+"</p>");
             }else{
-                article.content = article.content.replace(/<[^>]+>/g,"");
                 if(article.content.toLowerCase().indexOf('http') == -1) 
                     article.content = 'http://'+article.content;
                 
@@ -523,20 +531,7 @@ module.controller('ContentController',['$scope','$http','$templateCache','$sce',
 
 module.controller('DirectoryController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
-        
-        var timer = null;
-        var sec = 500;
-        $scope.loaddata = false;
-        $scope.directories = [];
-        $scope.emptySearch = true;
-        $scope.nodata  = false;
-        
-        $scope.clearInput = function(){
-            $scope.key = '';
-            $scope.emptySearch = true;
-            $scope.nodata  = false;  
-            $scope.directories = [];
-        }
+
         $scope.OpenDirectoryPage = function($event,type){
             var dict = {
                 title : $($event.target).text(),
@@ -549,19 +544,27 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
                     myNavigator.pushPage('pages/directorylist.html');    
                 }else{
                     AKHB.notification.alert("No directory data.",function(){
-                        AKHB.utils.exitApp();
+                        //AKHB.utils.exitApp();
                     });
                 }
                 
             });
 
         }
+        console.log("getDirectoryCategories");
         DB.getDirectoryCategories(function(err,data){
-            console.log("getDirectoryCategories",data);
             $scope.$apply(function(){
                 $scope.categories = data;
             });
         })
+
+
+        var timer = null;
+        var sec = 500;
+        $scope.loaddata = false;
+        $scope.directories = [];
+        $scope.emptySearch = true;
+        $scope.nodata  = false;
 
         $scope.OpenDirectoryDetail = function(directory){
             $templateCache.put('directory',directory);
@@ -619,9 +622,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
  
             DB.getDirectoriesPagnation($scope.dict.type,index,function(err,data){
                 $scope.$apply(function(){
-                    if(data.length > 0) {
-                        itemScope.item = data[0];
-                    }
+                    if(data.length > 0) itemScope.item = data[0];
                 })
                 
              });
@@ -641,8 +642,6 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
 module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.directory = $templateCache.get('directory');
-        if(typeof $scope.directory.content == 'string')
-            $scope.directory.content = JSON.parse($scope.directory.content);
         // $scope.directory.members = JSON.parse($scope.directory.members);
         $scope.openDescription = function(directory){
             $templateCache.put('directory',directory);
@@ -657,16 +656,9 @@ module.controller('DirectoryIndividualController',['$scope','$rootScope','$http'
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.individual = $templateCache.get('individual');
 
-        $scope.OpenCommittees = function(committe){
-            DB.getCommitteById(committe.id,function(err,data){
-                if(data){
-                    $templateCache.put('directory',data);
-                    myNavigator.pushPage('pages/directorydetail.html');    
-                }   else{
-                    $templateCache.put('individual',null);
-                    myNavigator.pushPage('pages/directoryindividual.html');
-                }
-            })
+        $scope.openIndividual = function(individual){
+            $templateCache.put('individual',individual);
+            myNavigator.pushPage('pages/directoryindividual.html');
         };
 }]);
 module.controller('DirectoryDescriptionController',['$scope','$rootScope','$http','$templateCache','$sce',
@@ -716,6 +708,15 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
 }]);
 
 
+$(document).on('touchstart touchend','#list-message',function(e){
+
+    app.slidingMenu.setSwipeable(false); 
+    e.stopPropagation();
+    e.preventDefault();
+    setTimeout(function(){
+        app.slidingMenu.setSwipeable(true); 
+    },1000);
+})
 
 $(document).on('click','a',function(e){
 

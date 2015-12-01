@@ -8,6 +8,7 @@
     padding: 10px;
 }
 
+///////////////////////////
 
 .checkbox--noborder > input[type="checkbox"] {
   position: absolute;
@@ -162,7 +163,7 @@
   box-shadow: none;
   border: none;
 }
-
+/////////////////////////
 #LandingPageContainer .landingPage_logo {
     margin-top: 10px;
 }
@@ -176,6 +177,5 @@
 #LandingPageContainer .landingP_title {
     font-size: 14px;
     font-weight: bold;
-    color:#fff;
     margin-bottom: 10px;
 }

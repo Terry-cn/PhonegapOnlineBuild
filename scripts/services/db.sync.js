@@ -82,6 +82,7 @@ AKHB.services.db.DBSync =  (function(){
 							}
 							syncSuccess();
 							
+							
 						}
 				});
 			
@@ -143,22 +144,21 @@ AKHB.services.db.DBSync =  (function(){
 							function syncSuccess(){
 								console.log("Sync messages success.");
 								dbServices.getLatestActiveMessage(function(err,messsage){
-									console.log('getLatestActiveMessage',messsage);
+									console.log("getLatestActiveMessage",messsage);
 									if(messsage){
 										AKHB.notification.alert(messsage.content,function(){
 											messsage.read = 1;
-											if(callback && typeof callback == 'function') 
-												callback(null,result);
+											persistence.flush(null,function() {
+												if(callback && typeof callback == 'function') callback(null,result);
+											});
 										},messsage.title);
 									}else{
-										if(callback && typeof callback == 'function') 
-											callback(null,result);
+										if(callback && typeof callback == 'function') callback(null,result);
 									}
 									
 								});
 							}
-							//syncSuccess();
-							callback(null);
+							syncSuccess();
 						}
 				});
 			}catch(ex){
@@ -283,11 +283,11 @@ AKHB.services.db.DBSync =  (function(){
 			
 		}
 		this.syncCommittees = function(callback,tx){
-			var requestData = null;
+
 			async.waterfall([
 						function(callback){
 							dbServices.getTableLastUpdateTime('committees',function(err,result){
-								requestData = Request('committees',AKHB.user,getLastModified(result));
+								var requestData = Request('committees',AKHB.user,getLastModified(result));
 								var url = remoteAddress+'/webservice.php?'+ decodeURIComponent($.param(requestData));
 								callback(null,url);
 							});
@@ -301,7 +301,7 @@ AKHB.services.db.DBSync =  (function(){
 							if(result.response == 1){    
 								var lastModified;
 								async.each(result.content,function(committe,callback){
-									committe.last_modified_date = requestData.last_content_synced;
+									committe.last_modified_date = result.last_modified;
 									try{
 										dbServices.setCommitte(true,committe,remoteAddress,callback);
 									}catch(err){
@@ -359,7 +359,7 @@ AKHB.services.db.DBSync =  (function(){
 						usage:request
 					};
 					$.post(url,postdata,function(res, textStatus, jqXHR){
-						console.log(arguments);
+
 						if(textStatus=="success"){
 							$.each(data,function(index,_usage){
 								persistence.remove(_usage);
@@ -378,10 +378,7 @@ AKHB.services.db.DBSync =  (function(){
 						sendUsage(2,callback);
 					}
 				],function(err){
-					persistence.flush(null,function() {
-					  callback(err);
-					});
-					
+					 callback(err);
 				});
 			}catch(e){
 				console.log(e);
@@ -415,12 +412,13 @@ AKHB.services.db.DBSync =  (function(){
 						console.log("syncMessage finish");
 						callback(null);
 					},true);
-				// },function(callback){
-				// 	console.log("syncUsage");
-				// 	self.syncUsage(function(){
-				// 		console.log("syncUsage finish");
-				// 		callback(null);
-				// 	},true);
+				},
+				function(callback){
+					console.log("syncUsage");
+					self.syncUsage(function(){
+						console.log("syncUsage finish");
+						callback(null);
+					},true);
 				},function(callback){
 					console.log("syncCommittees");
 					self.syncCommittees(function(){

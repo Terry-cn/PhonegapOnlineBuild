@@ -5,7 +5,6 @@ window.AKHB ={
 		debug:true,
 		version:null,
 		timeout:20000,
-        synctimer:120000,
 		senderID:'675297324332'
 	}
 };

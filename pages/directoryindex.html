@@ -7,19 +7,16 @@
         <div class="right">
         </div>
     </ons-toolbar>
-    <div class="navigation-bar search-bar">
-        <div class="navigation-bar__center" style="margin: 0px;">
+    <div class="navigation-bar">
+        <div class="navigation-bar__center">
         <input type="search" class="search-input" style="width: 96%; margin: 6px auto 6px auto;" placeholder="Search" ng-model="key" ng-change="triggerSearch()">
-        <a ng-show="!emptySearch" class="btn-empty-search" href="javascript:void(0)" ng-click="clearInput()">
-          <i class="fa fa-times"></i>
-        </a>
       </div>
     </div>  
-    <ons-list style="width:100%;">
+    <ons-list>
         <ons-list-item ng-show="emptySearch"  ng-repeat="cate in categories"  modifier="chevron" ng-click="OpenDirectoryPage($event,cate)">
         {{cate.title}}
         </ons-list-item>
-        <ons-list-item  ng-show="loaddata" style="padding: 0;height: 600px; opacity:0.7; ">
+        <ons-list-item  ng-show="loaddata" style="padding: 0;height: 100%; ">
             <div class="loading"> 
                 <p><i class="fa fa-spin fa-spinner fa-lg"></i><br />
                     <span>loading ...</span>
@@ -36,7 +33,7 @@
           <ons-list-item class="person" ng-show="nodata">
             <ons-row>
               <ons-col class="person-name" >
-                No results found.
+                Not found results.
               </ons-col>
             </ons-row>
           </ons-list-item>
