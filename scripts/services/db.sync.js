@@ -336,8 +336,8 @@ AKHB.services.db.DBSync =  (function(){
 		};
 		this.syncUsage = function(callback,tx){
 			var url = remoteAddress+'/webservice.php?type=3';
-			function sendUsage(type,callback){
-				DB.getUsage(type,function(err,data){
+			function sendUsage(status,callback){
+				DB.getUsage(status,function(err,data){
 					var request = [];
 
 					if(data.length == 0) {
@@ -348,16 +348,17 @@ AKHB.services.db.DBSync =  (function(){
 					$.each(data,function(index,_usage){
 						
 						request.push({
-							type:_usage.type,
+							status:_usage.status,
 							id:AKHB.user.id,
 							content_id:_usage.content_id,
-							date_time:_usage.date_time
+							date_time:moment(_usage.date_time).format("YYYY-MM-DD hh:mm:ss")
 						});
 					});
 					var postdata = {
-						type:type,
+						status:status,
 						usage:request
 					};
+					console.log("usage",postdata);
 					$.post(url,postdata,function(res, textStatus, jqXHR){
 
 						if(textStatus=="success"){

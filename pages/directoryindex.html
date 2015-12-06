@@ -4,7 +4,7 @@
         <div class="left">
             <ons-toolbar-button ng-click="app.slidingMenu.toggleMenu()"><ons-icon icon="bars"></ons-icon></ons-toolbar-button>
         </div>
-        <div class="center">Directories</div>
+        <div class="center">{{nav.title}}</div>
         <div class="right">
         </div>
     </ons-toolbar>
@@ -27,6 +27,7 @@
                 </p>
             </div>
         </ons-list-item ng-show="loaddata" >
+          <ons-list-header ng-show="directories.length > 0" >Committees</ons-list-header>
           <ons-list-item class="person" modifier="tappable" ng-repeat="item in directories">
             <ons-row>
               <ons-col class="person-name list-search" modifier="chevron" ng-click="OpenDirectoryDetail(item)">
@@ -34,10 +35,26 @@
               </ons-col>
             </ons-row>
           </ons-list-item>
-          <ons-list-item class="person" ng-show="nodata">
+          <ons-list-item class="person" ng-show="noCommitteesData">
             <ons-row>
               <ons-col class="person-name" >
-                No results found.
+                No committe found.
+              </ons-col>
+            </ons-row>
+          </ons-list-item>
+
+          <ons-list-header ng-show="persons.length > 0" >Persons</ons-list-header>
+          <ons-list-item class="person" modifier="tappable" ng-repeat="item in persons">
+            <ons-row>
+              <ons-col class="person-name list-search" modifier="chevron" ng-click="openIndividual(item)">
+                {{item.name}}
+              </ons-col>
+            </ons-row>
+          </ons-list-item>
+          <ons-list-item class="person" ng-show="noPersonsData">
+            <ons-row>
+              <ons-col class="person-name" >
+                No person found.
               </ons-col>
             </ons-row>
           </ons-list-item>

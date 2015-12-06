@@ -7,38 +7,17 @@
 		</ons-list-item>
 		<!--  <ng-include src="'pages/menutemplate.html'" ng-model="navigations"></ng-include> -->
 
-		<ons-list-item ng-repeat-start="navigation in navigations"  ng-if="navigation.type==2 && navigation.status == 0"
-		    modifier="tappable"  
+		<ons-list-item ng-repeat-start="navigation in navigations"  ng-if="navigation.status == 0 && (navigation.type==1 || navigation.type==5)"
+		    modifier="chevron"  
 		    class="list__item__line-height"  ng-model="navigation" ng-click="openPage(navigation)">
 		    <i ng-class="{true:'fa',false:'fa fa-'+navigation.icon}[navigation.icon =='']"></i>
 		    {{navigation.title}}
 		</ons-list-item> 
-
-		
-		<ons-list-item modifier="tappable" ng-if="navigation.type==3"  class="list__item__line-height"
-		               onclick="app.slidingMenu.setMainPage('pages/messagelistpage.html', { closeMenu: true })">
-		    <i  ng-class="{true:'fa',false:'fa fa-'+navigation.icon}[navigation.icon =='']"></i>
-		     {{navigation.title}}
-		</ons-list-item>
-		<ons-list-item  ng-if="navigation.type==5"  class="list__item__line-height"  modifier="chevron"  
-		               onclick="app.slidingMenu.setMainPage('pages/directoryindex.html', { closeMenu: true })">
-		    <i  ng-class="{true:'fa',false:'fa fa-'+navigation.icon}[navigation.icon =='']"></i>
-		     {{navigation.title}}
-		</ons-list-item>
-		<ons-list-item   ng-if="navigation.type==4"  modifier="tappable" class="list__item__line-height" ng-click="signOut()">
-		    <i  ng-class="{true:'fa',false:'fa fa-'+navigation.icon}[navigation.icon =='']"></i>
-		    {{navigation.title}}
-		</ons-list-item>
-
-		<ons-list-item 
-		    ng-if="navigation.type==1" 
-		    ng-repeat-end
-		    modifier="chevron"  
-		    ng-click="openPage(navigation)"
-		    class="list__item__line-height">
+		<ons-list-item ng-repeat-end="navigation in navigations"  ng-if="navigation.status == 0 && navigation.type!=1 && navigation.type!=5"
+		    modifier="tappable" 
+		    class="list__item__line-height"  ng-model="navigation" ng-click="openPage(navigation)">
 		    <i ng-class="{true:'fa',false:'fa fa-'+navigation.icon}[navigation.icon =='']"></i>
 		    {{navigation.title}}
-		</ons-list-item>
-
+		</ons-list-item> 
 	</ons-list>
 </ons-page>

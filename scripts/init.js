@@ -29,9 +29,7 @@ AKHB.openContentPage =  function(navigation,$templateCache){
 
 
 module.controller('AppController',['$scope','$rootScope',function($scope,$rootScope){
-    //var scope = $scope;
     
-
     $rootScope.$on("BUSY", function(){ 
         $scope.busy = true;
         $scope.waitNetwork = false;
@@ -109,6 +107,7 @@ module.controller('LandingPageController',['$scope','$sce','$templateCache',func
 
      $scope.openPage = function(nav){
         $templateCache.put('navigation',nav);
+        console.log('navigation',nav.title);
         if(nav.type==2){
             AKHB.openContentPage(nav,$templateCache);
         }else if(nav.type==3){
@@ -289,9 +288,9 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
         function initLogin(){
             var onlineLogin = function(){
                 Auth.isWebserviceWorking($http,function(err,result){
+                    rootScope.$emit("NOTBUSY");
                     if(err){
                         AKHB.notification.alert(result.content,function(){
-                            rootScope.$emit("NOTBUSY");
                             AKHB.utils.exitApp();
                         },result.title);
                     }else{  
@@ -318,12 +317,12 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                                 
                             });
                         }
-                        rootScope.$emit("NOTBUSY");
+                        
                     }
                 });
             }
              try{
-                rootScope.$emit("BUSY"); 
+                //rootScope.$emit("BUSY"); 
                 // check network and server.
                 var syncTimes = 0;
                 var syncBackGround = function(){
@@ -353,7 +352,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                         syncBackGround();
                     });
                 }else{
-                    Auth.checkNetworkConnected();
+                    //Auth.checkNetworkConnected();
                     onlineLogin();
                 }
             }catch(ex){
@@ -379,7 +378,7 @@ module.controller('MenuController',['$scope','$http','$templateCache',
         app.slidingMenu.setSwipeable(true); 
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
-
+            console.log('MenuController',nav.title);
             if(nav.type==2){
                 AKHB.openContentPage(nav,$templateCache);
             }else if(nav.type==3){
@@ -530,6 +529,9 @@ module.controller('ContentController',['$scope','$http','$templateCache','$sce',
 
 module.controller('DirectoryController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
+        
+        $scope.nav = $templateCache.get('navigation');
+        console.log('DirectoryController',$scope.nav.title );
 
         $scope.OpenDirectoryPage = function($event,type){
             var dict = {
@@ -562,17 +564,34 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
         var sec = 500;
         $scope.loaddata = false;
         $scope.directories = [];
+        $scope.persons = [];      
         $scope.emptySearch = true;
-        $scope.nodata  = false;
+        $scope.noCommitteesData  = false;
+        $scope.noPersonsData  = false;
 
         $scope.OpenDirectoryDetail = function(directory){
             $templateCache.put('directory',directory);
             myNavigator.pushPage('pages/directorydetail.html');
         };
 
+        $scope.openIndividual = function(individual){
+
+            DB.getCommitteById(individual.id,function(err,data){
+                if(!err && data){
+                    $templateCache.put('directory',data);
+                    myNavigator.pushPage('pages/directorydetail.html');
+                }else{
+                    
+                    $templateCache.put('individual',individual.content);
+                    myNavigator.pushPage('pages/directoryindividual.html');
+                }
+            })
+            
+        };
         var search = function(){
             $scope.$apply(function(){
-                $scope.nodata  = false;  
+                $scope.noCommitteesData  = false;
+                $scope.noPersonsData  = false;
             })
             if(timer){
                 clearTimeout(timer);
@@ -580,7 +599,8 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
                     $scope.$apply(function(){
                         $scope.emptySearch = true;
                         $scope.loaddata = false;  
-                        $scope.nodata  = false;  
+                        $scope.noCommitteesData  = false;
+                        $scope.noPersonsData  = false;
                     })
                     return;
                 }
@@ -588,16 +608,32 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
             }
 
             timer = setTimeout(function(){
-                
-                DB.searchDirectories($scope.key,function(err,data){
-                    if(!err){
+                var data = {};
+                async.series([
+                    function(callback){
+                        DB.searchCommittees($scope.key,function(err,committees){
+                            data.committees = committees;
+                            callback(err);
+                        });
+                    },
+                    function(callback){
+                        DB.searchPersons($scope.key,function(err,persons){
+                            data.persons = persons;
+                            callback(err);
+                        });
+                    }
+                ],function(err){
+                     if(!err){
                         $scope.$apply(function(){
-                            $scope.nodata  =  data.length == 0;
+                            $scope.noCommitteesData  = data.committees.length == 0;
+                            $scope.noPersonsData  = data.persons.length == 0;
                             $scope.loaddata = false;
-                            $scope.directories = data;
+                            $scope.directories = data.committees;
+                            $scope.persons = data.persons;
                         });
                     }
                 });
+  
             },sec);
         };
         $scope.triggerSearch = function(){
@@ -652,7 +688,6 @@ module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$t
 module.controller('DirectoryIndividualController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.individual = $templateCache.get('individual');
-
         $scope.openIndividual = function(individual){
 
             DB.getCommitteById(individual.id,function(err,data){

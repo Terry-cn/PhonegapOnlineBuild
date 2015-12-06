@@ -323,9 +323,9 @@ AKHB.services.db.prototype.setMessageUsed = function(id,callback){
 	})
 };
 
-AKHB.services.db.prototype.setUsage = function(id,type,callback){
+AKHB.services.db.prototype.setUsage = function(id,status,callback){
 	var _usage = new usage({
-		type:type,
+		status:status,
 		content_id:id,
 		date_time:new Date()
 	});
@@ -337,7 +337,7 @@ AKHB.services.db.prototype.setUsage = function(id,type,callback){
 
 
 AKHB.services.db.prototype.getUsage = function(type,callback){
-	var usages = usage.all().filter('type','=',type).limit(30);
+	var usages = usage.all().filter('status','=',type).limit(30);
 	usages.list(function(data){
 		callback(null,data);
 	})
@@ -375,7 +375,6 @@ AKHB.services.db.prototype.getDirectoryCategories = function(callback){
 };
 AKHB.services.db.prototype.setDirectoryCategories = function(model,remoteAddress,last_content_synced,callback){
 	var that = this;
-	debugger
 	var _category = category.all().filter('type','=',model.type);
 	_category.one(function(dbCategory){
 		if(dbCategory == null){
@@ -414,7 +413,22 @@ AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteA
 				console.log(ex);
 				return;
 			}
-			if(data.content) model.content = JSON.stringify(data.content);
+			if(data.content) {
+
+				model.content = JSON.stringify(data.content);
+				model.is_show = 1;
+				async.each(data.content,function(data,callback){
+					for(var person in data.names){
+						person = data.names[person];
+						console.log($.trim(person.forename)+' '+$.trim(person.Surname));
+						persistence.add(new persons({
+							committe_id: model.server_id,
+						    name:$.trim(person.forename)+' '+$.trim(person.Surname),
+						    content:person
+						}));
+					}
+				});
+			}
 		})
 
 	},200);
@@ -457,26 +471,49 @@ AKHB.services.db.prototype.setDirectory = function(model,id,callback){
 
 };
 AKHB.services.db.prototype.getDirectories = function(type,callback){
-	var directories = committees.all().filter('inst_type','=',type).limit(30);
+	var directories = committees.all()
+	.filter('inst_type','=',type)
+	.and(new persistence.PropertyFilter('is_show','=','1'))
+	.limit(30);
 	directories.list(function(data){
 		callback(null,data);
 	})
 };
 
 AKHB.services.db.prototype.getDirectoriesPagnation = function(category,page,callback){
-	var directories = committees.all().filter('inst_type','=',category).order('title',true).limit(1).skip(page*1);
+	var directories = committees.all()
+	.filter('inst_type','=',category)
+	.and(new persistence.PropertyFilter('is_show','=','1'))
+	.order('title',true).limit(1).skip(page*1);
 	directories.list(function(data){
 		callback(null,data);
 	})
 };
-AKHB.services.db.prototype.searchDirectories = function(key,callback){
+
+AKHB.services.db.prototype.searchPersons = function(key,callback){
+
+	var _persons = persons.all()
+	.filter('name','like','%'+key+'%')
+	//.and(new persistence.PropertyFilter('is_show','=','1'))
+	//.or(new persistence.PropertyFilter('title','like','%'+key+'%'))
+	.order('name',true).limit(20);
+	_persons.list(function(data){
+		callback(null,data);
+	})
+};	
+
+AKHB.services.db.prototype.searchCommittees = function(key,callback){
 	var directories = committees.all()
-	.filter('content','like','%'+key+'%')
-	.or(new persistence.PropertyFilter('title','like','%'+key+'%'))
+	.filter('title','like','%'+key+'%')
+	.and(new persistence.PropertyFilter('is_show','=','1'))
+	//.or(new persistence.PropertyFilter('title','like','%'+key+'%'))
 	.order('title',true).limit(20);
 	directories.list(function(data){
 		callback(null,data);
 	})
+};	
+
+
 	// persistence.transaction(function(tx){
 	// 	key = key.replace(/'/g,'\\\'');
 	// 	tx.executeSql('select id from committees where title like \'%'+key+'%\' or content like \'%'+key+'%\' order by title asc limit 20 ;',
@@ -489,9 +526,11 @@ AKHB.services.db.prototype.searchDirectories = function(key,callback){
 	// 			console.log(err);
 	// 		});
 	// })
-};
+
 AKHB.services.db.prototype.getDirectoriesCount = function(category,callback){
-	var directories = committees.all().filter('inst_type','=',category);
+	var directories = committees.all()
+	.filter('inst_type','=',category)
+	.and(new persistence.PropertyFilter('is_show','=','1'));
 	directories.count(function(count){
 		callback(null,count);
 	})

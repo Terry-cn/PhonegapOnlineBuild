@@ -55,22 +55,26 @@ var message = persistence.define('messages', {
 
 var usage = persistence.define('usages', {
     content_id: "TEXT",
-    type:"INT",
-    date_time:"DATE"
+    status:"INT",
+    date_time:"DATE",
 });
 
-var directory =  persistence.define('directories', {
-    server_id: "INT",
-    type:"INT",
-    title:"TEXT",
-    description:"TEXT",
-    email:"TEXT",
-    members:"JSON",
-    status :"INT",
-    last_modified:"DATE",
-    category_id : "TEXT"
+// var directory =  persistence.define('directories', {
+//     server_id: "INT",
+//     type:"INT",
+//     title:"TEXT",
+//     description:"TEXT",
+//     email:"TEXT",
+//     members:"JSON",
+//     status :"INT",
+//     last_modified:"DATE",
+//     category_id : "TEXT"
+// });
+var persons = persistence.define('persons', {
+    committe_id: "INT",
+    name:"TEXT",
+    content:"JSON"
 });
-
 var committees =  persistence.define('committees', {
     server_id:"INT",
     inst_type :"INT",
@@ -80,7 +84,8 @@ var committees =  persistence.define('committees', {
     email :"TEXT",
     status :"INT",
     last_modified:"DATE",
-    content:"TEXT"
+    content:"TEXT",
+    is_show:"INT"
 });
 
 //directory.index(['title','category_id']);

@@ -46,38 +46,36 @@ AKHB.services.authentication = (function(){
 			return navigator.network && navigator.network.connection && navigator.network.connection.type != Connection.NONE;
 		};
 		this.isWebserviceWorking = function($http,callback){
-			console.log('isWebserviceWorking',appConfig.remoteAddress + '/webservice.php')
-			$http({
-				url:appConfig.remoteAddress + '/webservice.php',
-				timeout:appConfig.timeout,
-				type:'GET',
-				// success :function(data){
-				// 	callback(false,data);
-				// },
-				// complete : function(XMLHttpRequest,status){
-				// 	if(status=='timeout'){
-				// 		callback(true,MSG_RETUIREDNETWORK);
-				// 	}
-				// },
-				// transformResponse:function(data, headersGetter, status){
-				// 	XMLHttpRequest.abort();
-				// 	if(textStatus !='timeout')
-				// 		callback(true,MSG_SYSTEMERROR);
-				// 	console.log(XMLHttpRequest, textStatus, errorThrown);
-				// }
-			}).
-			success(function(data,status){
-				callback(false,data);
-			}).
-			error(function(data,status,headers,config,statusText){
-				//XMLHttpRequest.abort();
-				if(statusText !='timeout')
-					callback(true,MSG_SYSTEMERROR);
-				else
-					callback(true,MSG_RETUIREDNETWORK);
-				
-				console.log(arguments);
-			})
+			callback(false,null);
+			// $http({
+			// 	url:appConfig.remoteAddress + '/webservice.php',
+			// 	timeout:appConfig.timeout,
+			// 	type:'GET',
+			// 	// success :function(data){
+			// 	// 	callback(false,data);
+			// 	// },
+			// 	// complete : function(XMLHttpRequest,status){
+			// 	// 	if(status=='timeout'){
+			// 	// 		callback(true,MSG_RETUIREDNETWORK);
+			// 	// 	}
+			// 	// },
+			// 	// transformResponse:function(data, headersGetter, status){
+			// 	// 	XMLHttpRequest.abort();
+			// 	// 	if(textStatus !='timeout')
+			// 	// 		callback(true,MSG_SYSTEMERROR);
+			// 	// 	console.log(XMLHttpRequest, textStatus, errorThrown);
+			// 	// }
+			// }).
+			// success(function(data,status){
+			// 	callback(false,data);
+			// }).
+			// error(function(data,status,headers,config,statusText){
+			// 	//XMLHttpRequest.abort();
+			// 	if(statusText !='timeout')
+			// 		callback(true,MSG_SYSTEMERROR);
+			// 	else
+			// 		callback(true,MSG_RETUIREDNETWORK);
+			// })
 		};
 		this.checkRemoteAuthentication = function($http,requestData,callback){
 			var self = this;
