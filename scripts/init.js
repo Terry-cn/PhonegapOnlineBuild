@@ -609,6 +609,7 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
 
             timer = setTimeout(function(){
                 var data = {};
+                $scope.key =  $.trim($scope.key.replace(/\s+/g, ' '));
                 async.series([
                     function(callback){
                         DB.searchCommittees($scope.key,function(err,committees){
