@@ -100,6 +100,7 @@ module.controller('AppController',['$scope','$rootScope',function($scope,$rootSc
 module.controller('SlidingMenuController',['$scope',function($scope){
     $scope.$on("isready", function(event,data){ 
         $scope.isready = data;
+
     });
 }]);
 module.controller('LandingPageController',['$scope','$sce','$templateCache',function($scope,$sce,$templateCache){
@@ -150,7 +151,7 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
     var scope = $scope;
     scope.nav =  $templateCache.get('navigation');
     scope.menuClick = function(){
-        app.slidingMenu.setSwipeable(true);
+        // app.slidingMenu.setSwipeable(true);
         app.slidingMenu.toggleMenu();
         // app.slidingMenu.once('postclose',function(){
         //      app.slidingMenu.setSwipeable(false);
@@ -250,7 +251,7 @@ module.controller('MessageDetailController',['$scope','$rootScope','$http','$tem
 
 module.controller('LoginController',['$scope','$http','$templateCache','$rootScope',
     function($scope, $http, $templateCache,$rootScope) {
-        console.log('LoginController',$scope.$id,$rootScope.$id);
+        app.slidingMenu.setSwipeable(false); 
 
         var Auth = new AKHB.services.authentication(AKHB.config);
         var DBSync = null;
@@ -374,8 +375,6 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
 
 module.controller('MenuController',['$scope','$http','$templateCache',
     function($scope, $http, $templateCache) {
-        //console.log('MenuController',$scope.$id);
-        app.slidingMenu.setSwipeable(true); 
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
             console.log('MenuController',nav.title);
