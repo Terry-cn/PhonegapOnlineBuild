@@ -588,6 +588,18 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
             })
             
         };
+
+        $scope.clearInput = function(){
+
+            $scope.key = '';
+            $scope.emptySearch = true;
+            $scope.loaddata = false;  
+            $scope.noCommitteesData  = true;
+            $scope.noPersonsData  = true;
+            $scope.directories = [];
+            $scope.persons = [];
+        }
+
         var search = function(){
             $scope.$apply(function(){
                 $scope.noCommitteesData  = false;
@@ -740,6 +752,14 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
                 });
             },sec);
         };
+
+        $scope.clearInput = function(){
+            $scope.key = '';
+            $scope.emptySearch = true;
+            $scope.nodata  = false;  
+            $scope.directories = [];
+        }
+
         $scope.triggerSearch = function(){
             $scope.loaddata = true;
             $scope.directories = [];

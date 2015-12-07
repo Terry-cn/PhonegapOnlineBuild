@@ -35,7 +35,7 @@
               </ons-col>
             </ons-row>
           </ons-list-item>
-          <ons-list-item class="person" ng-show="noCommitteesData">
+          <ons-list-item class="person" ng-show="!emptySearch && noCommitteesData">
             <ons-row>
               <ons-col class="person-name" >
                 No committe found.
@@ -51,7 +51,7 @@
               </ons-col>
             </ons-row>
           </ons-list-item>
-          <ons-list-item class="person" ng-show="noPersonsData">
+          <ons-list-item class="person" ng-show="!emptySearch && noPersonsData">
             <ons-row>
               <ons-col class="person-name" >
                 No person found.
