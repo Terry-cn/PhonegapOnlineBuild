@@ -358,7 +358,6 @@ AKHB.services.db.DBSync =  (function(){
 						status:status,
 						usage:request
 					};
-					console.log("usage",postdata);
 					$.post(url,postdata,function(res, textStatus, jqXHR){
 
 						if(textStatus=="success"){

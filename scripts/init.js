@@ -251,6 +251,7 @@ module.controller('MessageDetailController',['$scope','$rootScope','$http','$tem
 
 module.controller('LoginController',['$scope','$http','$templateCache','$rootScope',
     function($scope, $http, $templateCache,$rootScope) {
+
         app.slidingMenu.setSwipeable(false); 
 
         var Auth = new AKHB.services.authentication(AKHB.config);
@@ -258,7 +259,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
         var scope = $scope;
         var rootScope = $rootScope;
 
-        scope.isready = false; 
+        scope.isready = true; 
 
         ons.ready(function(){
             if(typeof device == 'undefined'){
@@ -276,7 +277,6 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     });
                 }
             };
-            scope.isready = true; 
             setTimeout(function(){
                 DB =  new AKHB.services.db(function(){
                     DBSync = new AKHB.services.db.DBSync(AKHB.config,$http);

@@ -124,7 +124,6 @@ AKHB.services.authentication = (function(){
 				else
 					callback(true,MSG_RETUIREDNETWORK);
 				
-				console.log(arguments);
 			});
 		};
 	}

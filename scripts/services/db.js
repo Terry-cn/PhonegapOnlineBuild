@@ -420,7 +420,6 @@ AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteA
 				async.each(data.content,function(data,callback){
 					for(var person in data.names){
 						person = data.names[person];
-						console.log($.trim(person.forename)+' '+$.trim(person.Surname));
 						persistence.add(new persons({
 							committe_id: model.server_id,
 						    name:$.trim(person.forename)+' '+$.trim(person.Surname),
