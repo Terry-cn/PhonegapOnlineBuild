@@ -100,7 +100,6 @@ module.controller('AppController',['$scope','$rootScope',function($scope,$rootSc
 module.controller('SlidingMenuController',['$scope',function($scope){
     $scope.$on("isready", function(event,data){ 
         $scope.isready = data;
-
     });
 }]);
 module.controller('LandingPageController',['$scope','$sce','$templateCache',function($scope,$sce,$templateCache){
@@ -133,7 +132,7 @@ module.controller('LandingPageController',['$scope','$sce','$templateCache',func
     $scope.signOut = signOut;
     DB.getHomeArticle(function(err,result){
         DB.getHomepageIcons(function(err,navigations){
-            DB.getMessageCount(function(err,count){
+            DB.getUnreadMessageCount(function(err,count){
                 scope.$apply( function() {
                     $scope.messageCount = count;
                     $scope.hasMessage = count > 0;
@@ -259,7 +258,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
         var scope = $scope;
         var rootScope = $rootScope;
 
-        scope.isready = true; 
+        scope.isready = false; 
 
         ons.ready(function(){
             if(typeof device == 'undefined'){
@@ -277,6 +276,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     });
                 }
             };
+            scope.isready = true;     
             setTimeout(function(){
                 DB =  new AKHB.services.db(function(){
                     DBSync = new AKHB.services.db.DBSync(AKHB.config,$http);

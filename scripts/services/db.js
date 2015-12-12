@@ -283,6 +283,15 @@ AKHB.services.db.prototype.getMessageCount = function(callback){
 		callback(false,count);
 	});
 };
+AKHB.services.db.prototype.getUnreadMessageCount = function(callback){
+	var mMessages = message.all();
+	mMessages.filter('status','=','0')
+	.count(null,function(count){
+		callback(false,count);
+	});
+};
+
+
 AKHB.services.db.prototype.getActiveMessageCount = function(callback){
 	var mMessages = message.all();
 	mMessages.filter('type','=','2')

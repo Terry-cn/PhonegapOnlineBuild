@@ -14,7 +14,9 @@
         </ons-list-item>
         <ons-list-header ng-repeat-start="member in directory.members">{{member.role}}</ons-list-header>
         <ons-list-item ng-repeat-end ng-repeat="name in member.names" ng-click="openIndividual(name)">
+        <p>
         {{name.title}} {{name.forename}} {{name.Surname}}
+        </p>
         </ons-list-item>
     </ons-list>
 </ons-page>

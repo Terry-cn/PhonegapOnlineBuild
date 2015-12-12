@@ -97,6 +97,7 @@ iframe,.article-iframe{
 	 box-orient: horizontal;
 	 box-pack: center;
 	 box-align: center;
+	  font-family:"Times New Roman",Georgia,Serif;
 }
 .loading i{
 	font-size: 3em;
@@ -258,6 +259,11 @@ span.Editeve{
 
 ons-list-item p{
 	line-height: 120%;
+	overflow: hidden;
+    word-wrap: break-word;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin: 0;
 }
 .list-search{
 	height: 44px;

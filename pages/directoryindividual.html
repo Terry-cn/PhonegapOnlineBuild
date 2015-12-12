@@ -21,7 +21,7 @@
         Committees
         </ons-list-header>
         <ons-list-item ng-show="individual.committees" ng-repeat="item in individual.committees" ng-click="openIndividual(item)">
-        {{item.title}}
+        <p>{{item.title}}</p>
         </ons-list-item>
 
         <ons-list-item ng-show="!individual.committees && !individual.email && !individual.mobile && !individual.home_number">
