@@ -276,7 +276,9 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     });
                 }
             };
-            scope.isready = true;     
+            scope.$apply(function(){
+                scope.isready = true;         
+            })
             setTimeout(function(){
                 DB =  new AKHB.services.db(function(){
                     DBSync = new AKHB.services.db.DBSync(AKHB.config,$http);
