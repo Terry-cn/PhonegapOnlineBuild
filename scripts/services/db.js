@@ -9,12 +9,12 @@ AKHB.services.db =(function(){
 	return function(callback){
 		try{
 	        persistence.schemaSync(function(tx){
-	        	callback();
+	        	if(typeof callback == "function") callback();
 	            console.log("Update schema success.");
 	        });
 	    }catch(ex){
 	         console.log("Update schema failed.",ex);
-	         callback();
+	         if(typeof callback == "function") callback();
 	    }
 
 	}
@@ -221,6 +221,7 @@ AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,cal
 			    description :_committe.description,
 			    email :_committe.email,
 			    status :_committe.status,
+			    is_show : 1,
 			    last_modified:moment(_committe.last_modified).toDate()
 			});
 			persistence.add(dbCommitte);
@@ -482,7 +483,8 @@ AKHB.services.db.prototype.syncLatestTask =function(){
 			});	
 		},function(err){
 			setTimeout(function(){
-				that.syncLatestTask();
+				var DB = new AKHB.services.db();
+				DB.syncLatestTask();
 			},1000);
 		})
 	})
@@ -574,11 +576,11 @@ AKHB.services.db.prototype.getDirectories = function(type,callback){
 	})
 };
 
-AKHB.services.db.prototype.getDirectoriesPagnation = function(category,page,callback){
+AKHB.services.db.prototype.getDirectoriesPagnation = function(category,callback){
 	var directories = committees.all()
 	.filter('inst_type','=',category)
 	.and(new persistence.PropertyFilter('is_show','=','1'))
-	.order('title',true).limit(1).skip(page*1);
+	.order('title',true);//.limit(pageSize).skip(page*pageSize);
 	directories.list(function(data){
 		callback(null,data);
 	})

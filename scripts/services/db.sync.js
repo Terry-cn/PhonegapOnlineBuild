@@ -11,7 +11,7 @@ if(typeof(AKHB.services.db) == 'undefined'){
 
 AKHB.services.db.DBSync =  (function(){
 	
-	
+	AKHB.config.firstRun = true;
 	var getLastModified = function(result){
 		if(!result){
 			return '1900-01-01 00:00:00';
@@ -387,10 +387,9 @@ AKHB.services.db.DBSync =  (function(){
 			
 		};
 
-		this.runInBackGround = function(callback){
+		this.runInBackGround = function(callback,noSleep){
 			var self = this;
 			console.log("runInBackGround");
-			DB.syncLatestTask();
 			async.series([
 
 				function(callback){
@@ -431,8 +430,18 @@ AKHB.services.db.DBSync =  (function(){
 			],function(err){
 				console.log("runInBackGround finish");
 				persistence.flush(null,function() {
-					if(callback && typeof callback == 'function') 
-						callback(err);			 
+					if(callback && typeof callback == 'function') {
+						if(noSleep) {
+							callback();
+						}else{
+							setTimeout(callback,AKHB.config.timeout);
+						}
+					}
+					if(AKHB.config.firstRun){
+						AKHB.config.firstRun = false;
+						setTimeout(DB.syncLatestTask,10000);
+					}
+							 
 				});
 			})
 		}

@@ -107,7 +107,6 @@ module.controller('LandingPageController',['$scope','$sce','$templateCache',func
 
      $scope.openPage = function(nav){
         $templateCache.put('navigation',nav);
-        console.log('navigation',nav.title);
         if(nav.type==2){
             AKHB.openContentPage(nav,$templateCache);
         }else if(nav.type==3){
@@ -169,7 +168,6 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
     };
     var loadMessage = function(){
        DB.getMessages(function(err,messages){
-        console.log(messages);
             scope.$apply( function() {
                 scope.messages = messages;
             });
@@ -313,7 +311,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                                         app.slidingMenu.setSwipeable(true);
                                         app.slidingMenu.setMainPage('pages/landingpage.html');
                                         syncBackGround();
-                                    });
+                                    },true);
                                 }
                                 
                             });
@@ -330,16 +328,12 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     syncTimes ++;
                     if(Auth.checkNetworkConnected()){
                         DBSync.runInBackGround(function(){
-                            setTimeout(function(){
                                 console.log('sync times:'+syncTimes);
                                 syncBackGround();
-                            },10*60*1000);
                         });
                     }else{
-                        setTimeout(function(){
                             console.log('sync times:'+syncTimes);
                             syncBackGround();
-                        },60000);
                     }
                 }
                 if(Auth.isCachedAuthentication()){
@@ -377,7 +371,6 @@ module.controller('MenuController',['$scope','$http','$templateCache',
     function($scope, $http, $templateCache) {
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
-            console.log('MenuController',nav.title);
             if(nav.type==2){
                 AKHB.openContentPage(nav,$templateCache);
             }else if(nav.type==3){
@@ -530,7 +523,6 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
     function($scope,$rootScope,$http, $templateCache,$sce) {
         
         $scope.nav = $templateCache.get('navigation');
-        console.log('DirectoryController',$scope.nav.title );
 
         $scope.OpenDirectoryPage = function($event,type){
             var dict = {
@@ -540,8 +532,14 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
             DB.getDirectoriesCount(type.id,function(err,data){
                 dict.count = data;
                 if(dict.count > 0){
-                    $templateCache.put('dict',dict);
-                    myNavigator.pushPage('pages/directorylist.html');    
+                    DB.getDirectoriesPagnation(type.id,function(err,data){
+                        $scope.$apply(function(){
+                            dict.items = data;
+                            $templateCache.put('dict',dict);
+                            myNavigator.pushPage('pages/directorylist.html');  
+                        });
+                    }); 
+                      
                 }else{
                     AKHB.notification.alert("No directory data.",function(){
                         //AKHB.utils.exitApp();
@@ -551,7 +549,6 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
             });
 
         }
-        console.log("getDirectoryCategories");
         DB.getDirectoryCategories(function(err,data){
             $scope.$apply(function(){
                 $scope.categories = data;
@@ -649,20 +646,17 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
 module.controller('DirectoryListController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.dict = $templateCache.get('dict');
-        $scope.dict.data = [];
         $scope.OpenDirectoryDetail = function(directory){
             $templateCache.put('directory',directory);
             myNavigator.pushPage('pages/directorydetail.html');
         };
+        var pageIndex = 0;
+        var pageSize = 20;
+        $scope.items = [];
+        
         $scope.MyDelegate  = {
           configureItemScope: function(index, itemScope) {
- 
-            DB.getDirectoriesPagnation($scope.dict.type,index,function(err,data){
-                $scope.$apply(function(){
-                    if(data.length > 0) itemScope.item = data[0];
-                })
-                
-             });
+            itemScope.item = $scope.dict.items[index];
           },
           calculateItemHeight: function(index) {
             return 45;
@@ -765,16 +759,16 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
 }]);
 
 
-$(document).on('touchstart touchend','#list-message',function(e){
+// $(document).on('touchstart touchend','#list-message',function(e){
 
-    app.slidingMenu.setSwipeable(false); 
-    e.stopPropagation();
-    e.preventDefault();
-    if(window.swipTimer) clearTimeout(window.swipTimer);
-    window.swipTimer = setTimeout(function(){
-        app.slidingMenu.setSwipeable(true); 
-    },2000);
-})
+//     app.slidingMenu.setSwipeable(false); 
+//     e.stopPropagation();
+//     e.preventDefault();
+//     if(window.swipTimer) clearTimeout(window.swipTimer);
+//     window.swipTimer = setTimeout(function(){
+//         app.slidingMenu.setSwipeable(true); 
+//     },2000);
+// })
 
 $(document).on('click','a',function(e){
 
@@ -833,7 +827,6 @@ function tokenHandler (result) {
 }
 // result contains any message sent from the plugin call
 function successHandler (result) {
-   console.log('result = ' + result);
    //sendRegistionId(result);
 }
 // result contains any error description text returned from the plugin call
@@ -841,10 +834,8 @@ function errorHandler (error) {
     alert('error = ' + error);
 }
 function sendRegistionId(id){
-    console.log("sendRegistionId",id);
     var url = window.AKHB.config.remoteAddress+'/webservice.php?type=4&deviceid='+AKHB.user.deviceid+'&notificationid=' + id;
     $.get(url,function(data){
-        console.log('sendRegistionId',id,data);
     })
 }
 // iOS
