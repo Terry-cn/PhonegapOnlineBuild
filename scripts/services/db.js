@@ -407,39 +407,125 @@ AKHB.services.db.prototype.setDirectoryCategories = function(model,remoteAddress
 		}
 	})
 }
+AKHB.services.db.prototype.syncLatestTask =function(){
+	var that = this;
+	var tasks = syncTask.all()
+	.filter('status','=',0)
+	.limit(5);
+
+	tasks.list(function(data){
+		// callback(null,data);
+		async.each(data,function(item,callback){
+			var url = AKHB.config.remoteAddress+'/webservice.php?type=2&table=directory';
+			url+='&id='+item.committe_id;
+			url+='&inst_type='+item.inst_type;
+			url+='&last_content_synced='+moment(item.last_modified).format("YYYY-MM-DD");
+
+			var directories = committees.all()
+			.filter('server_id','=',item.committe_id)
+			directories.one(function(model){
+				
+				$.get(url,function(data){
+					try{
+						data = JSON.parse(data);
+					}catch(ex){
+						console.log(ex);
+						callback(null);
+						return;
+					}
+					if(data.content) {
+						model.content = JSON.stringify(data.content);
+						model.is_show = 1;
+						async.each(data.content,function(role,callback){
+							async.each(role.names,function(name,nameCallback){
+								name.committees = JSON.stringify(name.committees);
+								name.name = name.forename + ' '+name.Surname;
+								var result = persons.all();
+ 
+								if(name.title && name.title != ''){
+									result = result.and(new persistence.PropertyFilter('title','=',name.title));
+								}
+								if(name.name && name.name != ''){
+									result = result.and(new persistence.PropertyFilter('name','=',name.name));
+								}
+								if(name.home_number && name.home_number != ''){
+									result = result.and(new persistence.PropertyFilter('home_number','=',name.home_number));
+								}
+								if(name.mobile && name.mobile != ''){
+									result = result.and(new persistence.PropertyFilter('mobile','=',name.mobile));
+								}
+								if(name.email && name.email != ''){
+									result = result.and(new persistence.PropertyFilter('email','=',name.email));
+								}
+								if(name.committees && name.committees != ''){
+									result = result.and(new persistence.PropertyFilter('committees','=',name.committees));
+								}
+								result.one(function(dbPerson){
+									if(!dbPerson){
+										persistence.add(new persons(name));
+									}
+									nameCallback(null);
+								})
+								
+							},function(err){
+								callback(null);
+							})
+						},function(err){
+							persistence.remove(item);
+							callback(null);
+						});
+					}else{
+						persistence.remove(item);
+						callback(null);
+					}
+				})
+			});	
+		},function(err){
+			setTimeout(function(){
+				that.syncLatestTask();
+			},1000);
+		})
+	})
+}
 AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteAddress){
 	var that = this;
-	var url = remoteAddress+'/webservice.php?type=2&table=directory';
-	url+='&id='+model.server_id;
-	url+='&inst_type='+model.inst_type;
-	url+='&last_content_synced='+last_modified;
 
-	setTimeout(function(){
-		$.get(url,function(data){
-			try{
-				data = JSON.parse(data);
-			}catch(ex){
-				console.log(ex);
-				return;
-			}
-			if(data.content) {
+	var _task = new syncTask({
+		committe_id: model.server_id,
+	    status:0,
+	    inst_type : model.inst_type,
+	    last_modified:last_modified
+	});
+	persistence.add(_task);
+	
+	
 
-				model.content = JSON.stringify(data.content);
-				model.is_show = 1;
-				async.each(data.content,function(data,callback){
-					for(var person in data.names){
-						person = data.names[person];
-						persistence.add(new persons({
-							committe_id: model.server_id,
-						    name:$.trim(person.forename)+' '+$.trim(person.Surname),
-						    content:person
-						}));
-					}
-				});
-			}
-		})
+	// setTimeout(function(){
+	// 	$.get(url,function(data){
+	// 		try{
+	// 			data = JSON.parse(data);
+	// 		}catch(ex){
+	// 			console.log(ex);
+	// 			return;
+	// 		}
+	// 		if(data.content) {
 
-	},200);
+	// 			model.content = JSON.stringify(data.content);
+	// 			model.is_show = 1;
+	// 			async.each(data.content,function(data,callback){
+	// 				for(var person in data.names){
+	// 					person = data.names[person];
+	// 					persistence.add(new persons({
+	// 						committe_id: model.server_id,
+	// 					    name:$.trim(person.forename)+' '+$.trim(person.Surname),
+	// 					    content:person
+	// 					}));
+	// 				}
+	// 			});
+	// 		}
+	// 	})
+
+	// },200);
 		
 };
 AKHB.services.db.prototype.setDirectory = function(model,id,callback){

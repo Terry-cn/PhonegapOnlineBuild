@@ -276,16 +276,14 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     });
                 }
             };
-            scope.$apply(function(){
-                scope.isready = true;         
-            })
+            scope.isready = true;         
             setTimeout(function(){
                 DB =  new AKHB.services.db(function(){
                     DBSync = new AKHB.services.db.DBSync(AKHB.config,$http);
                     initLogin();
                 });  
 
-            },100);           
+            },1000);           
         });
         
         function initLogin(){
@@ -576,18 +574,8 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
         };
 
         $scope.openIndividual = function(individual){
-
-            DB.getCommitteById(individual.id,function(err,data){
-                if(!err && data){
-                    $templateCache.put('directory',data);
-                    myNavigator.pushPage('pages/directorydetail.html');
-                }else{
-                    
-                    $templateCache.put('individual',individual.content);
-                    myNavigator.pushPage('pages/directoryindividual.html');
-                }
-            })
-            
+            $templateCache.put('individual',individual);
+            myNavigator.pushPage('pages/directoryindividual.html');
         };
 
         $scope.clearInput = function(){
@@ -702,6 +690,12 @@ module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$t
 module.controller('DirectoryIndividualController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.individual = $templateCache.get('individual');
+        if(!$scope.individual.name){
+            $scope.individual.name = $scope.individual.forename + ' '+$scope.individual.Surname;
+        }
+        if(typeof $scope.individual.committees == 'string'){
+            $scope.individual.committees = JSON.parse($scope.individual.committees);
+        }
         $scope.openIndividual = function(individual){
 
             DB.getCommitteById(individual.id,function(err,data){

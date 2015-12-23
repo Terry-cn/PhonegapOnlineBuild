@@ -59,6 +59,13 @@ var usage = persistence.define('usages', {
     date_time:"DATE",
 });
 
+var syncTask = persistence.define('tasks', {
+    committe_id: "INT",
+    status:"INT",
+    last_modified:"DATE",
+    inst_type:"INT"
+});
+
 // var directory =  persistence.define('directories', {
 //     server_id: "INT",
 //     type:"INT",
@@ -71,11 +78,15 @@ var usage = persistence.define('usages', {
 //     category_id : "TEXT"
 // });
 var persons = persistence.define('persons', {
-    committe_id: "INT",
+    committees: "TEXT",
+    title:"TEXT",
     name:"TEXT",
-    content:"JSON"
+    home_number:"TEXT",
+    mobile:"TEXT",
+    email:"TEXT",
 });
-var committees =  persistence.define('committees', {
+
+var committees = persistence.define('committees', {
     server_id:"INT",
     inst_type :"INT",
     category :"TEXT",

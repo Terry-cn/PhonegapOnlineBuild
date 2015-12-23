@@ -271,3 +271,13 @@ ons-list-item p{
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+ons-list-header,.item-name{
+	overflow: hidden;
+    word-wrap: break-word;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.item-description{
+	line-height: 160%;
+    padding: 10px;
+}

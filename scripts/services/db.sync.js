@@ -386,9 +386,11 @@ AKHB.services.db.DBSync =  (function(){
 			}
 			
 		};
+
 		this.runInBackGround = function(callback){
 			var self = this;
 			console.log("runInBackGround");
+			DB.syncLatestTask();
 			async.series([
 
 				function(callback){
