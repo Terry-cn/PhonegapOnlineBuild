@@ -258,7 +258,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
         var scope = $scope;
         var rootScope = $rootScope;
 
-        scope.isready = false; 
+        scope.isready = true; 
 
         ons.ready(function(){
             if(typeof device == 'undefined'){
