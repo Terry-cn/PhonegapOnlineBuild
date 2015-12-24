@@ -98,6 +98,7 @@ iframe,.article-iframe{
 	 box-pack: center;
 	 box-align: center;
 	  font-family:"Times New Roman",Georgia,Serif;
+	      padding-top: 10px;
 }
 .loading i{
 	font-size: 3em;
