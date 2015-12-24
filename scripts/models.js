@@ -1,6 +1,6 @@
 
 // persistence.store.websql.config(persistence, 'AKHB', 'AKHB db', 10 * 1024 * 1024);
-// persistence.store.memory.config(persistence);
+
 persistence.store.cordovasql.config(
   persistence,
   'myIIUK',
@@ -12,6 +12,8 @@ persistence.store.cordovasql.config(
                           //   0: iTunes + iCloud, 1: NO iTunes + iCloud, 2: NO iTunes + NO iCloud
                           //   More information at https://github.com/litehelpers/Cordova-sqlite-storage#opening-a-database
 );
+
+//persistence.store.memory.config(persistence);
 persistence.debug = false;
 
 

@@ -9,7 +9,7 @@
     </ons-toolbar>
     <ons-list>
        
-        <ons-list-item ons-lazy-repeat="MyDelegate" modifier="chevron" ng-click="OpenDirectoryDetail(item)">
+        <ons-list-item ons-lazy-repeat="MyDelegate" modifier="chevron" ng-click="OpenDirectoryDetail(item)" ng-show="item">
             <div style="height:44px; word-break:keep-all; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{item.title}}</div>
         </ons-list-item>
     </ons-list>

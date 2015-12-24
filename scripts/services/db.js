@@ -7,6 +7,7 @@ if(typeof(AKHB.services) == 'undefined'){
 
 AKHB.services.db =(function(){
 	return function(callback){
+		console.log("AKHB.services.db init inner.");
 		try{
 	        persistence.schemaSync(function(tx){
 	        	if(typeof callback == "function") callback();
@@ -16,7 +17,6 @@ AKHB.services.db =(function(){
 	         console.log("Update schema failed.",ex);
 	         if(typeof callback == "function") callback();
 	    }
-
 	}
 })();
 
@@ -91,13 +91,8 @@ AKHB.services.db.prototype.setArticle = function(tx,_article,callback){
 				resultArticle.status= _article.status;
 			}
 		}
-		if(!tx){
-			persistence.flush(function() {
-			  callback(false);
-			});
-		}else{
-			callback(false);
-		};
+		callback(false);
+
 	});
 };
 
@@ -133,13 +128,7 @@ AKHB.services.db.prototype.setMessage = function(tx,_message,callback){
 				resultMessage.status= _message.status;
 			}
 		}
-		if(!tx){
-			persistence.flush(function() {
-			  callback(false);
-			});
-		}else{
-			callback(false);
-		};
+		callback(false);
 	});
 };
 
@@ -191,13 +180,7 @@ AKHB.services.db.prototype.setNavigation = function(tx,_navigation,callback){
 				resultNavigation.home_page = _navigation.home_page;
 			}
 		}
-		if(!tx){
-			persistence.flush(function() {
-			  callback(false);
-			});
-		}else{
-			callback(false);
-		}
+		callback(false);
 	});
 };
 
@@ -340,7 +323,7 @@ AKHB.services.db.prototype.setUsage = function(id,status,callback){
 		date_time:new Date()
 	});
 	persistence.add(_usage);
-	persistence.flush(callback);
+	if(typeof callback == "function") callback();
 };
 
 
@@ -437,7 +420,7 @@ AKHB.services.db.prototype.syncLatestTask =function(){
 					if(data.content) {
 						model.content = JSON.stringify(data.content);
 						model.is_show = 1;
-						async.each(data.content,function(role,callback){
+						async.each(data.content,function(role,contentCallback){
 							async.each(role.names,function(name,nameCallback){
 								name.committees = JSON.stringify(name.committees);
 								name.name = name.forename + ' '+name.Surname;
@@ -469,7 +452,7 @@ AKHB.services.db.prototype.syncLatestTask =function(){
 								})
 								
 							},function(err){
-								callback(null);
+								contentCallback(null);
 							})
 						},function(err){
 							persistence.remove(item);
@@ -482,12 +465,15 @@ AKHB.services.db.prototype.syncLatestTask =function(){
 				})
 			});	
 		},function(err){
-			setTimeout(function(){
-				var DB = new AKHB.services.db();
-				DB.syncLatestTask();
-			},1000);
+			persistence.flush(function(){
+				setTimeout(function(){
+					window.DB.syncLatestTask();
+				},5000);
+			})
+			
 		})
 	})
+
 }
 AKHB.services.db.prototype.setDirectories = function(model,last_modified,remoteAddress){
 	var that = this;
@@ -576,11 +562,11 @@ AKHB.services.db.prototype.getDirectories = function(type,callback){
 	})
 };
 
-AKHB.services.db.prototype.getDirectoriesPagnation = function(category,callback){
+AKHB.services.db.prototype.getDirectoriesPagnation = function(category,index,callback){
 	var directories = committees.all()
 	.filter('inst_type','=',category)
 	.and(new persistence.PropertyFilter('is_show','=','1'))
-	.order('title',true);//.limit(pageSize).skip(page*pageSize);
+	.order('title',true).limit(1).skip((index-1)*1);
 	directories.list(function(data){
 		callback(null,data);
 	})

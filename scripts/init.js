@@ -8,7 +8,7 @@ var pushNotification;
 var module = ons.bootstrap('AKHB', ['onsen','ngTouch']);
 AKHB.user = { id:null, authcode:null,appVersion:'1.0'};
 
-var DB = null;
+window.DB = null;
 
 AKHB.openContentPage =  function(navigation,$templateCache){
     if(navigation.type == 1){
@@ -132,12 +132,12 @@ module.controller('LandingPageController',['$scope','$sce','$templateCache',func
     DB.getHomeArticle(function(err,result){
         DB.getHomepageIcons(function(err,navigations){
             DB.getUnreadMessageCount(function(err,count){
-                scope.$apply( function() {
-                    $scope.messageCount = count;
-                    $scope.hasMessage = count > 0;
-                    $scope.navigations = navigations;
-                    $scope.title = $sce.trustAsHtml(result.title);
-                    $scope.article = $sce.trustAsHtml(result.content);
+                scope.$apply(function(){
+                    scope.messageCount = count;
+                    scope.hasMessage = count > 0;
+                    scope.navigations = navigations;
+                    scope.title = $sce.trustAsHtml(result.title);
+                    scope.article = $sce.trustAsHtml(result.content);
                 });
             });
         })  
@@ -274,13 +274,12 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     });
                 }
             };
-            scope.isready = true;         
+            scope.isready = true;  
+            console.log("AKHB.services.db init Outer.");
+              
             setTimeout(function(){
-                DB =  new AKHB.services.db(function(){
-                    DBSync = new AKHB.services.db.DBSync(AKHB.config,$http);
-                    initLogin();
-                });  
-
+                DBSync = new AKHB.services.db.DBSync(AKHB.config,$http);
+                initLogin();
             },1000);           
         });
         
@@ -308,6 +307,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                                     
                                     DBSync.runInBackGround(function(err){
                                         rootScope.$emit("NOTBUSY");
+                                        $rootScope.$broadcast("MenuReady");
                                         app.slidingMenu.setSwipeable(true);
                                         app.slidingMenu.setMainPage('pages/landingpage.html');
                                         syncBackGround();
@@ -367,8 +367,8 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
 }]);
 
 
-module.controller('MenuController',['$scope','$http','$templateCache',
-    function($scope, $http, $templateCache) {
+module.controller('MenuController',['$scope','$rootScope','$http','$templateCache',
+    function($scope, $rootScope, $http, $templateCache) {
         $scope.openPage = function(nav){
             $templateCache.put('navigation',nav);
             if(nav.type==2){
@@ -401,7 +401,11 @@ module.controller('MenuController',['$scope','$http','$templateCache',
                 });
             });
         }
-
+        $rootScope.$on("MenuReady", function(){ 
+            loadMenu($scope);
+            console.log('emit MenuReady');
+        });
+        
         app.slidingMenu.on('preopen',function(){
             loadMenu($scope);
         });
@@ -529,32 +533,10 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
                 title : $($event.target).text(),
                 type:type.id
             };
-            DB.getDirectoriesCount(type.id,function(err,data){
-                dict.count = data;
-                if(dict.count > 0){
-                    DB.getDirectoriesPagnation(type.id,function(err,data){
-                        $scope.$apply(function(){
-                            dict.items = data;
-                            $templateCache.put('dict',dict);
-                            myNavigator.pushPage('pages/directorylist.html');  
-                        });
-                    }); 
-                      
-                }else{
-                    AKHB.notification.alert("No directory data.",function(){
-                        //AKHB.utils.exitApp();
-                    });
-                }
-                
-            });
-
+            $templateCache.put('dict',dict);
+            myNavigator.pushPage('pages/directorylist.html'); 
         }
-        DB.getDirectoryCategories(function(err,data){
-            $scope.$apply(function(){
-                $scope.categories = data;
-            });
-        })
-
+        $scope.categories = JSON.parse(localStorage.getItem("category")).items;
 
         var timer = null;
         var sec = 500;
@@ -646,17 +628,34 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
 module.controller('DirectoryListController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.dict = $templateCache.get('dict');
+        $scope.dict.count = 50;
+        DB.getDirectoriesCount($scope.dict.type,function(err,data){
+            $scope.$apply(function(){
+                $scope.dict.count = data;
+                $scope.MyDelegate.countItems = function() {
+                    return $scope.dict.count;
+                }
+            })
+            
+        });
         $scope.OpenDirectoryDetail = function(directory){
             $templateCache.put('directory',directory);
             myNavigator.pushPage('pages/directorydetail.html');
         };
         var pageIndex = 0;
         var pageSize = 20;
-        $scope.items = [];
+        $scope.items = new Array($scope.dict.count);
         
         $scope.MyDelegate  = {
           configureItemScope: function(index, itemScope) {
-            itemScope.item = $scope.dict.items[index];
+            if(!itemScope.item){
+                DB.getDirectoriesPagnation($scope.dict.type,index,function(err,data){
+                    $scope.$apply(function(){
+                        itemScope.item = data[0];
+                    })
+                });
+            }
+            //itemScope.item = $scope.dict.items[index];
           },
           calculateItemHeight: function(index) {
             return 45;

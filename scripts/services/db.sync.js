@@ -35,7 +35,8 @@ AKHB.services.db.DBSync =  (function(){
 	return function(appConfig,$http){
 
 		var remoteAddress = appConfig.remoteAddress;
-		var dbServices = DB;
+		window.DB =  new AKHB.services.db();   
+		var dbServices = window.DB;
 		//http://stage.iiuk.homeip.net/Pages/Healthboard_App/webservice.php?type=2&id=[uuid]&os=8.1&device=iphone6s&version=1.0&last_content_synced=2013-12-12
 
 		this.syncArticle = function(callback,tx){
@@ -200,7 +201,7 @@ AKHB.services.db.DBSync =  (function(){
 							}
 						},function(affectCount,lastModified,callback){
 							dbServices.setTableLastUpdateTime(true,'navigations',lastModified,function(result){
-								console.log('updated navigations last_content_synced');
+								//console.log('updated navigations last_content_synced');
 								callback(false,result,affectCount);
 							})
 						}
@@ -210,7 +211,7 @@ AKHB.services.db.DBSync =  (function(){
 						}else{
 
 							function syncSuccess(){
-								console.log("Sync navigation success.");
+								//console.log("Sync navigation success.");
 								if(callback && typeof callback == 'function') callback(null,result);
 							}
 							syncSuccess();
@@ -250,11 +251,11 @@ AKHB.services.db.DBSync =  (function(){
 											callback(err);
 										});
 									}catch(err){
-										console.log("Error - setDirectoryCategories:",err);
+										//console.log("Error - setDirectoryCategories:",err);
 										callback(err);
 									}
 								},function(err){
-									console.log('syncing directory');
+									//console.log('syncing directory');
 									//callback(null,result.length,new Date());
 									callback(null,result.content.length,result.last_content_synced);
 								});
@@ -264,7 +265,7 @@ AKHB.services.db.DBSync =  (function(){
 						},function(affectCount,lastModified,callback){
 							//
 							dbServices.setTableLastUpdateTime(true,'directories',lastModified,function(result){
-								console.log('updated directories last_content_synced');
+								//console.log('updated directories last_content_synced');
 								callback(false,result,affectCount);
 							})
 						}
@@ -303,6 +304,24 @@ AKHB.services.db.DBSync =  (function(){
 								async.each(result.content,function(committe,callback){
 									committe.last_content_synced = requestData.last_content_synced;
 									try{
+										var category = localStorage.getItem("category");
+										if(category ==null){
+											category = {
+												names:[],
+												items:[]
+											};
+										}else{
+											category = JSON.parse(category);
+										}
+										var item = {
+											id:committe.inst_type,
+											title:committe.category
+										};
+										if(category.names.indexOf(committe.category) < 0){
+											category.names = category.names.concat(committe.category);
+											category.items = category.items.concat(item);
+											localStorage.setItem("category",JSON.stringify(category));
+										}
 										dbServices.setCommitte(true,committe,remoteAddress,callback);
 									}catch(err){
 										console.log(err);
@@ -316,7 +335,7 @@ AKHB.services.db.DBSync =  (function(){
 							}
 						},function(affectCount,lastModified,callback){
 							dbServices.setTableLastUpdateTime(true,'committees',lastModified,function(result){
-								console.log('updated committees last_modified_date',lastModified);
+								//console.log('updated committees last_modified_date',lastModified);
 								callback(false,result,affectCount);
 							})
 						}
@@ -326,7 +345,7 @@ AKHB.services.db.DBSync =  (function(){
 						}else{
 
 							function syncSuccess(){
-								console.log("Sync last_modified_date success.");
+								//console.log("Sync last_modified_date success.");
 								if(callback && typeof callback == 'function') callback(null,result);
 							}
 							syncSuccess();
@@ -389,55 +408,53 @@ AKHB.services.db.DBSync =  (function(){
 
 		this.runInBackGround = function(callback,noSleep){
 			var self = this;
-			console.log("runInBackGround");
+			//console.log("runInBackGround..................................",noSleep,AKHB.config.timeout);
 			async.series([
 
 				function(callback){
-					console.log("syncArticle");
+					//console.log("syncArticle");
 					self.syncArticle(function(){
-						console.log("syncArticle finish");
+						//console.log("syncArticle finish");
 						callback(null);
 					},true);
 				},
 				function(callback){
-					console.log("syncNavigation");
+					//console.log("syncNavigation");
 					self.syncNavigation(function(){
-						console.log("syncNavigation finish");
+						//console.log("syncNavigation finish");
 						callback(null);
 					},true);
 				},
 				
 				function(callback){
-					console.log("syncMessage");
+					//console.log("syncMessage");
 					self.syncMessage(function(){
-						console.log("syncMessage finish");
+						//console.log("syncMessage finish");
 						callback(null);
 					},true);
 				},
 				function(callback){
-					console.log("syncUsage");
+					//console.log("syncUsage");
 					self.syncUsage(function(){
-						console.log("syncUsage finish");
+						//console.log("syncUsage finish");
 						callback(null);
 					},true);
 				},function(callback){
-					console.log("syncCommittees");
+					//console.log("syncCommittees");
 					self.syncCommittees(function(){
-						console.log("syncCommittees finish");
+						//console.log("syncCommittees finish");
 						callback(null);
 					},true);
 				},
 			],function(err){
-				console.log("runInBackGround finish");
+				//console.log("runInBackGround finish");
 				persistence.flush(null,function() {
 					if(callback && typeof callback == 'function') {
-						if(noSleep) {
-							callback();
-						}else{
-							setTimeout(callback,AKHB.config.timeout);
-						}
+						setTimeout(function(){
+							callback()
+						},noSleep ? 10 : AKHB.config.timeout);
 					}
-					if(AKHB.config.firstRun){
+					if(noSleep && AKHB.config.firstRun){
 						AKHB.config.firstRun = false;
 						setTimeout(DB.syncLatestTask,10000);
 					}
