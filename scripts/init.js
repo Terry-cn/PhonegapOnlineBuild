@@ -652,6 +652,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
         $scope.dict.count = 50;
         $rootScope.$emit("BUSY");
         var busy = true;
+
         DB.getDirectoriesCount($scope.dict.type,function(err,data){
             $scope.$apply(function(){
                 $scope.dict.count = data;
@@ -681,6 +682,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
                     $scope.$apply(function(){
                         if(busy) {
                             busy = false;
+                            $('ons-list').removeAttr('style');
                             $rootScope.$emit("NOTBUSY");
                         } 
                         itemScope.item = data[0];
