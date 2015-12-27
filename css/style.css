@@ -282,3 +282,6 @@ ons-list-header,.item-name{
 	line-height: 160%;
     padding: 10px;
 }
+#list-message{
+	transition: transform 0.4s linear 0s; 
+}

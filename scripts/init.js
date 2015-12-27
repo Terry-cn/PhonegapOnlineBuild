@@ -183,6 +183,8 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
         console.log('emit Refresh');
     });
     $scope.swipeLeft = function($event){
+        $event.stopPropagation();
+        $event.preventDefault();
         var target = $($event.target);
         if(!$($event.target).hasClass('swipe')){
             target = $($event.target).parents('.swipe:eq(0)').get(0);
@@ -190,7 +192,9 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
         $(target).addClass('show-del-btn');
     };
     $scope.swipeRight = function($event){
-         var target = $($event.target);
+        var target = $($event.target);
+        $event.stopPropagation();
+        $event.preventDefault();
          if($event.target.tagName.toLowerCase() != 'ons-list-item'){
             if($(target.parents('ons-list-item:eq(0)').get(0)).offset().left == 0){
                 app.slidingMenu.openMenu();
@@ -793,11 +797,21 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
 $(document).on('touchstart touchend','#list-message',function(e){
     var list = $('#list-message');
     var currentTouche = e.originalEvent.changedTouches[0];
-        
+    var maxOffset  = list.height() - list.parent().height();
+   
     if(e.type == 'touchend'){
-        if(Math.abs(currentTouche.pageY - window.prevTouche.pageY) < 88){
-            e.stopPropagation();
-            e.preventDefault();
+        var offset = currentTouche.pageY - window.prevTouche.pageY;
+        offset = offset *2;
+        var currentOffset = list.attr('data-offset') ? parseInt(list.attr('data-offset')) + offset : offset;
+        if(Math.abs(currentOffset) > maxOffset){
+            currentOffset = -maxOffset;
+        }
+        if(currentOffset > 0){
+            currentOffset = 0;
+        }
+        list.attr('data-offset',currentOffset,offset);
+        if(Math.abs(offset) > 10 ){
+           list.css('transform','translate3d(0, '+currentOffset+'px, 0)' );
         }
     }
 
@@ -809,8 +823,11 @@ $(document).on('touchstart touchend','#list-message',function(e){
         app.slidingMenu.setSwipeable(true); 
     },2000);
 })
-
-$(document).on('click','a',function(e){
+.on('touchmove','#list-message',function(e){
+    e.stopPropagation();
+    e.preventDefault();
+})
+.on('click','a',function(e){
 
         var $this = $(this);
         var $href = $this.attr('href');
