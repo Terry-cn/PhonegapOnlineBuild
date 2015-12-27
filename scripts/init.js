@@ -790,7 +790,7 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
 }]);
 
 
-$(document).on('touchstart touchend','#list-message',function(e){
+$(document).on('touchstart touchend','#list-message .ons-list-item',function(e){
 
     app.slidingMenu.setSwipeable(false); 
     e.stopPropagation();

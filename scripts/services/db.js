@@ -224,8 +224,11 @@ AKHB.services.db.prototype.setCommitte = function(tx,_committe,remoteAddress,cal
 				dbCommitte.email = _committe.email;
 			}
 		}
-		that.setDirectories(dbCommitte,_committe.last_content_synced,remoteAddress);
-		callback(err);
+		persistence.flush(function(){
+			that.setDirectories(dbCommitte,_committe.last_content_synced,remoteAddress);
+			callback(err);
+		});
+		
 	});
 };
 
