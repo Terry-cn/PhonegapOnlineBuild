@@ -77,7 +77,8 @@ AKHB.services.db.prototype.setArticle = function(tx,_article,callback){
 			  	content: _article.content.replace(/\\\"/ig, "\""),
 			  	last_modified: moment(_article.last_modified).toDate(),//_article.last_modified,
 			  	type:_article.type,
-			  	status:_article.status
+			  	status:_article.status,
+			  	is_read:0
 			});
 			persistence.add(_mArticle);
 		}else{
@@ -89,6 +90,7 @@ AKHB.services.db.prototype.setArticle = function(tx,_article,callback){
 				resultArticle.last_modified= moment(_article.last_modified).toDate();
 				resultArticle.type= _article.type;
 				resultArticle.status= _article.status;
+				resultArticle.is_read = 0;
 			}
 		}
 		callback(false);
@@ -316,10 +318,11 @@ AKHB.services.db.prototype.setMessageUsed = function(id,callback){
 	})
 };
 
-AKHB.services.db.prototype.setUsage = function(id,status,callback){
+AKHB.services.db.prototype.setUsage = function(id,type,status,callback){
 	var _usage = new usage({
 		status:status,
-		content_id:id,
+		content_id: parseInt(id),
+		type:type,
 		date_time:new Date()
 	});
 	persistence.add(_usage);
@@ -406,64 +409,73 @@ AKHB.services.db.prototype.syncLatestTask =function(){
 			url+='&last_content_synced='+moment(item.last_modified).format("YYYY-MM-DD");
 
 			var directories = committees.all()
-			.filter('server_id','=',item.committe_id)
-			directories.one(function(model){
-				
-				$.get(url,function(data){
-					try{
-						data = JSON.parse(data);
-					}catch(ex){
-						console.log(ex);
-						callback(null);
-						return;
-					}
-					if(data.content) {
-						model.content = JSON.stringify(data.content);
-						model.is_show = 1;
-						async.each(data.content,function(role,contentCallback){
-							async.each(role.names,function(name,nameCallback){
-								name.committees = JSON.stringify(name.committees);
-								name.name = name.forename + ' '+name.Surname;
-								var result = persons.all();
- 
-								if(name.title && name.title != ''){
-									result = result.and(new persistence.PropertyFilter('title','=',name.title));
+			.filter('server_id','=',item.committe_id)				
+			$.get(url,function(data){
+				try{
+					data = JSON.parse(data);
+				}catch(ex){
+					console.log(ex);
+					callback(null);
+					return;
+				}
+				if(data.content) {
+					var content = JSON.stringify(data.content);
+					var _committeeContent = committeeContents.all().filter('server_id','=',item.committe_id);
+					_committeeContent.one(function(committeeContent){
+						if(committeeContent){
+							committeeContent.content = content;
+						}else{
+							persistence.add(new committeeContents({
+								server_id:item.committe_id,
+								content:content
+							}));
+						}
+						
+					});
+					async.each(data.content,function(role,contentCallback){
+						async.each(role.names,function(name,nameCallback){
+							name.committees = JSON.stringify(name.committees);
+							name.name = name.forename + ' '+name.Surname;
+							var result = persons.all();
+
+							if(name.title && name.title != ''){
+								result = result.and(new persistence.PropertyFilter('title','=',name.title));
+							}
+							if(name.name && name.name != ''){
+								result = result.and(new persistence.PropertyFilter('name','=',name.name));
+							}
+							if(name.home_number && name.home_number != ''){
+								result = result.and(new persistence.PropertyFilter('home_number','=',name.home_number));
+							}
+							if(name.mobile && name.mobile != ''){
+								result = result.and(new persistence.PropertyFilter('mobile','=',name.mobile));
+							}
+							if(name.email && name.email != ''){
+								result = result.and(new persistence.PropertyFilter('email','=',name.email));
+							}
+							if(name.committees && name.committees != ''){
+								result = result.and(new persistence.PropertyFilter('committees','=',name.committees));
+							}
+							result.one(function(dbPerson){
+								if(!dbPerson){
+									persistence.add(new persons(name));
 								}
-								if(name.name && name.name != ''){
-									result = result.and(new persistence.PropertyFilter('name','=',name.name));
-								}
-								if(name.home_number && name.home_number != ''){
-									result = result.and(new persistence.PropertyFilter('home_number','=',name.home_number));
-								}
-								if(name.mobile && name.mobile != ''){
-									result = result.and(new persistence.PropertyFilter('mobile','=',name.mobile));
-								}
-								if(name.email && name.email != ''){
-									result = result.and(new persistence.PropertyFilter('email','=',name.email));
-								}
-								if(name.committees && name.committees != ''){
-									result = result.and(new persistence.PropertyFilter('committees','=',name.committees));
-								}
-								result.one(function(dbPerson){
-									if(!dbPerson){
-										persistence.add(new persons(name));
-									}
-									nameCallback(null);
-								})
-								
-							},function(err){
-								contentCallback(null);
+								nameCallback(null);
 							})
+							
 						},function(err){
-							persistence.remove(item);
-							callback(null);
-						});
-					}else{
+							contentCallback(null);
+						})
+					},function(err){
 						persistence.remove(item);
 						callback(null);
-					}
-				})
-			});	
+					});
+				}else{
+					persistence.remove(item);
+					callback(null);
+				}
+			})
+
 		},function(err){
 			persistence.flush(function(){
 				setTimeout(function(){
@@ -549,9 +561,8 @@ AKHB.services.db.prototype.setDirectory = function(model,id,callback){
 		}
 		callback(null);
 	});
-	
-
 };
+
 AKHB.services.db.prototype.getDirectories = function(type,callback){
 	var directories = committees.all()
 	.filter('inst_type','=',type)
@@ -594,6 +605,12 @@ AKHB.services.db.prototype.searchCommittees = function(key,callback){
 		callback(null,data);
 	})
 };	
+AKHB.services.db.prototype.getCommitteContentById = function(id,callback){
+	var content = committeeContents.all().filter('server_id','=',id);
+	content.one(function(data){
+		callback(null,data);
+	})
+};
 
 
 	// persistence.transaction(function(tx){

@@ -23,12 +23,13 @@ var sync = persistence.define('sync', {
 });
 
 var article = persistence.define('articles', {
-	server_id:"INT",
+    server_id:"INT",
   	title: "TEXT",
   	content: "TEXT",
   	last_modified: "DATE",
   	type:"INT",
-  	status:"INT"
+  	status:"INT",
+    is_read:"INT"
 });
 
 var navigation = persistence.define('navigations', {
@@ -56,8 +57,9 @@ var message = persistence.define('messages', {
 });
 
 var usage = persistence.define('usages', {
-    content_id: "TEXT",
+    content_id: "INT",
     status:"INT",
+    type:"INT",
     date_time:"DATE",
 });
 
@@ -97,8 +99,11 @@ var committees = persistence.define('committees', {
     email :"TEXT",
     status :"INT",
     last_modified:"DATE",
-    content:"TEXT",
     is_show:"INT"
+});
+var committeeContents = persistence.define('committeeContent', {
+    server_id:"INT",
+    content:"TEXT",
 });
 
 //directory.index(['title','category_id']);

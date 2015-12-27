@@ -133,6 +133,10 @@ module.controller('LandingPageController',['$scope','$sce','$templateCache',func
         DB.getHomepageIcons(function(err,navigations){
             DB.getUnreadMessageCount(function(err,count){
                 scope.$apply(function(){
+                    if(!result.is_read){
+                        result.is_read=1;
+                        DB.setUsage(result.server_id,1,1,0);
+                    }
                     scope.messageCount = count;
                     scope.hasMessage = count > 0;
                     scope.navigations = navigations;
@@ -219,8 +223,13 @@ module.controller('MessageDetailController',['$scope','$rootScope','$http','$tem
         var scope = $scope;
         var message = $templateCache.get('message');
         $scope.message = message;
+    
+        if(message.status != 1)    {
+            DB.setUsage(message.server_id,2,1,0);
+            console.log(message.server_id,2,1,0);
+        }
+
         message.status = 1;
-        DB.setUsage(message.server_id,1);
         persistence.flush();
         
         $scope.deleteMessage = function(){
@@ -229,7 +238,7 @@ module.controller('MessageDetailController',['$scope','$rootScope','$http','$tem
                 callback: function(answer) {
                   if(answer){
                     DB.deleteMessage(message.server_id,function(){
-                        DB.setUsage(message.server_id,2);
+                        DB.setUsage(message.server_id,2,2);
                         $rootScope.$broadcast("Refresh");
                         myNavigator.popPage();
                     });
@@ -465,7 +474,11 @@ module.controller('ContentController',['$scope','$http','$templateCache','$sce',
         if(article == null) return;
         $scope.article = article;
         $scope.nav = $templateCache.get('navigation');
-        DB.setUsage(article.server_id,1);
+
+        if(!article.is_read){
+            article.is_read = 1;
+            DB.setUsage(article.server_id,1,1,0);
+        }  
         if(article.type==2){
             if(!Auth.isNetworkConnected()){
                 $scope.contentHTML = $sce.trustAsHtml("<p class=empty-content>"+MSG_RETUIREDNETWORK.content+"</p>");
@@ -548,8 +561,12 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
         $scope.noPersonsData  = false;
 
         $scope.OpenDirectoryDetail = function(directory){
-            $templateCache.put('directory',directory);
-            myNavigator.pushPage('pages/directorydetail.html');
+            DB.getCommitteContentById(directory.server_id,function(err,data){
+                if(data) directory.content = JSON.parse(data.content); 
+                $templateCache.put('directory',directory);
+                myNavigator.pushPage('pages/directorydetail.html');
+            })
+            
         };
 
         $scope.openIndividual = function(individual){
@@ -641,16 +658,21 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
             
         });
         $scope.OpenDirectoryDetail = function(directory){
-            $templateCache.put('directory',directory);
-            myNavigator.pushPage('pages/directorydetail.html');
+            DB.getCommitteContentById(directory.server_id,function(err,data){
+                if(data) directory.content = data.content; 
+                $templateCache.put('directory',directory);
+                myNavigator.pushPage('pages/directorydetail.html');
+            })
+            
         };
         var pageIndex = 0;
         var pageSize = 20;
-        $scope.items = new Array($scope.dict.count);
-        
+
         $scope.MyDelegate  = {
           configureItemScope: function(index, itemScope) {
+
             if(!itemScope.item){
+                itemScope.item = {};
                 DB.getDirectoriesPagnation($scope.dict.type,index,function(err,data){
                     $scope.$apply(function(){
                         if(busy) {
@@ -667,20 +689,20 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
             return 45;
           },
           countItems: function() {
-            return 50;
+            return 5;
           },
-          destroyItemScope: function(index, scope) {
-            //console.log("Destroyed item #" + index);
-          }
+          destroyItemScope: null
         };
 }]);
 
 module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$templateCache','$sce',
     function($scope,$rootScope,$http, $templateCache,$sce) {
         $scope.directory = $templateCache.get('directory');
+        
+        // if(typeof $scope.directory.members == "undefined")
+        //     $scope.directory.members = JSON.parse($scope.directory.content);
         if(typeof $scope.directory.members == "undefined")
             $scope.directory.members = JSON.parse($scope.directory.content);
-
         $scope.openIndividual = function(individual){
             $templateCache.put('individual',individual);
             myNavigator.pushPage('pages/directoryindividual.html');
@@ -721,8 +743,12 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
         $scope.directories = [];
         
         $scope.OpenDirectoryDetail = function(directory){
-            $templateCache.put('directory',directory);
-            myNavigator.pushPage('pages/directorydetail.html');
+            DB.getCommitteContentById(directory.server_id,function(err,data){
+                if(data) directory.content = JSON.parse(data.content); 
+                $templateCache.put('directory',directory);
+                myNavigator.pushPage('pages/directorydetail.html');
+            })
+            
         };
 
         var search = function(){
@@ -764,16 +790,16 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
 }]);
 
 
-// $(document).on('touchstart touchend','#list-message',function(e){
+$(document).on('touchstart touchend','#list-message',function(e){
 
-//     app.slidingMenu.setSwipeable(false); 
-//     e.stopPropagation();
-//     e.preventDefault();
-//     if(window.swipTimer) clearTimeout(window.swipTimer);
-//     window.swipTimer = setTimeout(function(){
-//         app.slidingMenu.setSwipeable(true); 
-//     },2000);
-// })
+    app.slidingMenu.setSwipeable(false); 
+    e.stopPropagation();
+    e.preventDefault();
+    if(window.swipTimer) clearTimeout(window.swipTimer);
+    window.swipTimer = setTimeout(function(){
+        app.slidingMenu.setSwipeable(true); 
+    },2000);
+})
 
 $(document).on('click','a',function(e){
 

@@ -370,6 +370,7 @@ AKHB.services.db.DBSync =  (function(){
 							status:_usage.status,
 							id:AKHB.user.id,
 							content_id:_usage.content_id,
+							type:_usage.type,
 							date_time:moment(_usage.date_time).format("YYYY-MM-DD hh:mm:ss")
 						});
 					});
