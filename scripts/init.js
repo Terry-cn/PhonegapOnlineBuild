@@ -274,7 +274,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
         ons.ready(function(){
             if(typeof device == 'undefined'){
                 AKHB.user.deviceid = '00000000000000031';
-                AKHB.user.os = 'test';
+                AKHB.user.os = 'ios';
                 AKHB.user.deviceName = 'browser test';
             }else{
                 AKHB.user.deviceid = device.uuid;
@@ -808,7 +808,7 @@ $(document).on('touchstart touchend','#list-message',function(e){
         }
         if(currentOffset > 0){
             currentOffset = 0;
-        }
+        } 
         list.attr('data-offset',currentOffset,offset);
         if(Math.abs(offset) > 10 ){
            list.css('transform','translate3d(0, '+currentOffset+'px, 0)' );
@@ -865,6 +865,11 @@ module.filter('safePhone', function ($sce) {
 module.filter('trustHtml', function ($sce) {
     return function (input) {
         return $sce.trustAsHtml(input);
+    }
+});
+module.filter('trustHtmlA', function ($sce) {
+    return function (input) {
+        return $sce.trustAsHtml(input.replace(/<[^>]+>/g,""));
     }
 });
 module.filter('formatTime', function ($sce) {
