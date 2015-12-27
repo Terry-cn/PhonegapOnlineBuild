@@ -694,7 +694,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
             return 45;
           },
           countItems: function() {
-            return 5;
+            return 60;
           },
           destroyItemScope: null
         };
