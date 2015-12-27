@@ -682,7 +682,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
                     $scope.$apply(function(){
                         if(busy) {
                             busy = false;
-                            $('ons-list').removeAttr('style');
+                            $('ons-list').css('height','100%');
                             $rootScope.$emit("NOTBUSY");
                         } 
                         itemScope.item = data[0];
