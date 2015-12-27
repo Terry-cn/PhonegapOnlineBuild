@@ -319,7 +319,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                                         $rootScope.$broadcast("MenuReady");
                                         app.slidingMenu.setSwipeable(true);
                                         app.slidingMenu.setMainPage('pages/landingpage.html');
-                                        syncBackGround();
+                                        setTimeout(syncBackGround,window.AKHB.config.timeout);
                                     },true);
                                 }
                                 
@@ -337,8 +337,8 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     syncTimes ++;
                     if(Auth.checkNetworkConnected()){
                         DBSync.runInBackGround(function(){
-                                console.log('sync times:'+syncTimes);
-                                syncBackGround();
+                            console.log('sync times:'+syncTimes);
+                            syncBackGround();
                         });
                     }else{
                             console.log('sync times:'+syncTimes);
@@ -701,7 +701,7 @@ module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$t
         
         // if(typeof $scope.directory.members == "undefined")
         //     $scope.directory.members = JSON.parse($scope.directory.content);
-        if(typeof $scope.directory.members == "undefined")
+        if(typeof $scope.directory.members == "undefined" && $scope.directory.content)
             $scope.directory.members = JSON.parse($scope.directory.content);
         $scope.openIndividual = function(individual){
             $templateCache.put('individual',individual);
