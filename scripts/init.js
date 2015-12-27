@@ -790,11 +790,20 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
 }]);
 
 
-$(document).on('touchstart touchend','#list-message .ons-list-item',function(e){
+$(document).on('touchstart touchend','#list-message',function(e){
+    var list = $('#list-message');
+    var currentTouche = e.originalEvent.changedTouches[0];
+        
+    if(e.type == 'touchend'){
+        if(Math.abs(currentTouche.pageY - window.prevTouche.pageY) < 88){
+            e.stopPropagation();
+            e.preventDefault();
+        }
+    }
 
+    window.prevTouche = currentTouche;
     app.slidingMenu.setSwipeable(false); 
-    e.stopPropagation();
-    e.preventDefault();
+    
     if(window.swipTimer) clearTimeout(window.swipTimer);
     window.swipTimer = setTimeout(function(){
         app.slidingMenu.setSwipeable(true); 
