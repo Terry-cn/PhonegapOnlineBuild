@@ -656,6 +656,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
         DB.getDirectoriesCount($scope.dict.type,function(err,data){
             $scope.$apply(function(){
                 $scope.dict.count = data;
+                $('ons-list').css('height',45*$scope.dict.count);
                 $scope.MyDelegate.countItems = function() {
                     return $scope.dict.count;
                 }
@@ -682,6 +683,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
                     $scope.$apply(function(){
                         if(busy) {
                             busy = false;
+
                             $rootScope.$emit("NOTBUSY");
                         } 
                         itemScope.item = data[0];
@@ -694,7 +696,7 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
             return 45;
           },
           countItems: function() {
-            return 60;
+            return 5;
           },
           destroyItemScope: null
         };
