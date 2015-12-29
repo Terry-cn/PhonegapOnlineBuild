@@ -34,7 +34,10 @@ AKHB.services.authentication = (function(){
 		};
 		this.cleanAuthentication = function(callback){
 			localStorage.removeItem('Authentication');
-			if(typeof callback == 'function') callback();
+			persistence.reset(function(){
+				if(typeof callback == 'function') callback();
+			});
+			
 		};
 		this.checkNetworkConnected = function(){
 			if(navigator.network && navigator.network.connection && navigator.network.connection.type == Connection.NONE)

@@ -46,7 +46,14 @@ module.controller('AppController',['$scope','$rootScope',function($scope,$rootSc
         console.log('emit WAITINGNETWORK',$scope.busy,$scope.$id);
     });
 
-    
+    $rootScope.signOut = function(){
+        var Auth = new AKHB.services.authentication(AKHB.config);
+        Auth.cleanAuthentication(function(){
+            app.slidingMenu.setSwipeable(false); 
+            app.slidingMenu.closeMenu();
+            app.slidingMenu.setMainPage('pages/login.html');    
+        });
+    }
     document.addEventListener('deviceready', function(){
     
 
@@ -102,7 +109,7 @@ module.controller('SlidingMenuController',['$scope',function($scope){
         $scope.isready = data;
     });
 }]);
-module.controller('LandingPageController',['$scope','$sce','$templateCache',function($scope,$sce,$templateCache){
+module.controller('LandingPageController',['$scope','$rootScope','$sce','$templateCache',function($scope,$rootScope,$sce,$templateCache){
     var scope = $scope;
 
      $scope.openPage = function(nav){
@@ -114,21 +121,14 @@ module.controller('LandingPageController',['$scope','$sce','$templateCache',func
         }else if(nav.type==5){
             app.slidingMenu.setMainPage('pages/directoryindex.html', { closeMenu: true })
         }else if(nav.type==4){
-            signOut();
+            $scope.signOut();
         }else{
             myNavigator.pushPage('pages/childmenu.html');
         }
         
     }
-    var signOut = function(){
-        var Auth = new AKHB.services.authentication(AKHB.config);
-        Auth.cleanAuthentication(function(){
-            app.slidingMenu.setSwipeable(false); 
-            app.slidingMenu.closeMenu();
-            app.slidingMenu.setMainPage('pages/login.html');    
-        });
-    }
-    $scope.signOut = signOut;
+
+    $scope.signOut = $rootScope.signOut;
     DB.getHomeArticle(function(err,result){
         DB.getHomepageIcons(function(err,navigations){
             DB.getUnreadMessageCount(function(err,count){
@@ -391,21 +391,14 @@ module.controller('MenuController',['$scope','$rootScope','$http','$templateCach
             }else if(nav.type==5){
                 app.slidingMenu.setMainPage('pages/directoryindex.html', { closeMenu: true })
             }else if(nav.type==4){
-                signOut();
+                $scope.signOut();
             }else{
                 myNavigator.pushPage('pages/childmenu.html');
             }
             
         }
-        var signOut = function(){
-            var Auth = new AKHB.services.authentication(AKHB.config);
-            Auth.cleanAuthentication(function(){
-                app.slidingMenu.setSwipeable(false); 
-                app.slidingMenu.closeMenu();
-                app.slidingMenu.setMainPage('pages/login.html');    
-            });
-        }
-        $scope.signOut = signOut;
+        
+        $scope.signOut = $rootScope.signOut;
         $scope.navigations = [];
         var loadMenu = function(scope){
             DB.getNavigationsByParentId(0,function(err,navigations){
@@ -797,40 +790,40 @@ module.controller('DirectorySearchController',['$scope','$rootScope','$http','$t
 }]);
 
 
-$(document).on('touchstart touchend','#list-message',function(e){
-    var list = $('#list-message');
-    var currentTouche = e.originalEvent.changedTouches[0];
-    var maxOffset  = list.height() - list.parent().height();
+// $(document).on('touchstart touchend','#list-message',function(e){
+//     var list = $('#list-message');
+//     var currentTouche = e.originalEvent.changedTouches[0];
+//     var maxOffset  = list.height() - list.parent().height();
    
-    if(e.type == 'touchend'){
-        var offset = currentTouche.pageY - window.prevTouche.pageY;
-        offset = offset *2;
-        var currentOffset = list.attr('data-offset') ? parseInt(list.attr('data-offset')) + offset : offset;
-        if(Math.abs(currentOffset) > maxOffset){
-            currentOffset = -maxOffset;
-        }
-        if(currentOffset > 0){
-            currentOffset = 0;
-        } 
-        list.attr('data-offset',currentOffset,offset);
-        if(Math.abs(offset) > 10 ){
-           list.css('transform','translate3d(0, '+currentOffset+'px, 0)' );
-        }
-    }
+//     if(e.type == 'touchend'){
+//         var offset = currentTouche.pageY - window.prevTouche.pageY;
+//         offset = offset *2;
+//         var currentOffset = list.attr('data-offset') ? parseInt(list.attr('data-offset')) + offset : offset;
+//         if(Math.abs(currentOffset) > maxOffset){
+//             currentOffset = -maxOffset;
+//         }
+//         if(currentOffset > 0){
+//             currentOffset = 0;
+//         } 
+//         list.attr('data-offset',currentOffset,offset);
+//         if(Math.abs(offset) > 10 ){
+//            list.css('transform','translate3d(0, '+currentOffset+'px, 0)' );
+//         }
+//     }
 
-    window.prevTouche = currentTouche;
-    app.slidingMenu.setSwipeable(false); 
+//     window.prevTouche = currentTouche;
+//     app.slidingMenu.setSwipeable(false); 
     
-    if(window.swipTimer) clearTimeout(window.swipTimer);
-    window.swipTimer = setTimeout(function(){
-        app.slidingMenu.setSwipeable(true); 
-    },2000);
-})
-.on('touchmove','#list-message',function(e){
-    e.stopPropagation();
-    e.preventDefault();
-})
-.on('click','a',function(e){
+//     if(window.swipTimer) clearTimeout(window.swipTimer);
+//     window.swipTimer = setTimeout(function(){
+//         app.slidingMenu.setSwipeable(true); 
+//     },2000);
+// })
+// .on('touchmove','#list-message',function(e){
+//     e.stopPropagation();
+//     e.preventDefault();
+// })
+$(document).on('click','a',function(e){
 
         var $this = $(this);
         var $href = $this.attr('href');
