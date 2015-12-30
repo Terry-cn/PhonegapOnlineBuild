@@ -585,7 +585,6 @@ AKHB.services.db.prototype.getOneDirectory = function(category,index,callback){
 	})
 };
 AKHB.services.db.prototype.getDirectoriesPagnation = function(category,index,pageSize,callback){
-	console.log(category,index,pageSize);
 	var directories = committees.all()
 	.filter('inst_type','=',category)
 	.and(new persistence.PropertyFilter('is_show','=','1'))

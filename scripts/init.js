@@ -654,14 +654,15 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
         };
         $scope.dicts = [];
         $scope.loadCompleted = false;
-        $scope.pageIndex = 0;
+        $scope.pageIndex = 1;
         $scope.pageSize = 20;
         $scope.myScroll = null;
         $scope.isLoading = true;
         $scope.myScrollOptions = {
-            snap: 'ons-list-item'
+            probeType: 3, 
+            mouseWheel: true 
         };
-        $scope.myScroll = new IScroll('#wrapper',$scope.myScrollOptions);
+        $scope.myScroll = new IScroll('#wrapper',{ probeType: 2, mouseWheel: true });
         $scope.getDirectoryDataCallback = function(err,data){
             $scope.isLoading = false;
             $scope.$apply(function(){
@@ -676,17 +677,20 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
                 $scope.pageIndex ++;
 
                 setTimeout(function(){
-                    
-                    $scope.myScroll.on('scrollEnd', function (){
-                        if($scope.loadCompleted || $scope.isLoading) return;
-                        $scope.isLoading = true;
-                        DB.getDirectoriesPagnation($scope.dict.type,$scope.pageIndex,$scope.pageSize,$scope.getDirectoryDataCallback);
-                    });
                     $scope.myScroll.refresh();
                 },500);
                 
             });
         }
+
+        $scope.myScroll.on('scrollEnd', function (){
+            if($scope.loadCompleted || $scope.isLoading) return;
+            if(Math.abs(this.maxScrollY - this.y) < 40){
+                $scope.isLoading = true;
+                DB.getDirectoriesPagnation($scope.dict.type,$scope.pageIndex,$scope.pageSize,$scope.getDirectoryDataCallback);
+            }
+        });
+        
         DB.getDirectoriesPagnation($scope.dict.type,$scope.pageIndex,$scope.pageSize,$scope.getDirectoryDataCallback);
 
         
