@@ -575,12 +575,21 @@ AKHB.services.db.prototype.getDirectories = function(type,callback){
 		callback(null,data);
 	})
 };
-
-AKHB.services.db.prototype.getDirectoriesPagnation = function(category,index,callback){
+AKHB.services.db.prototype.getOneDirectory = function(category,index,callback){
 	var directories = committees.all()
 	.filter('inst_type','=',category)
 	.and(new persistence.PropertyFilter('is_show','=','1'))
 	.order('title',true).limit(1).skip((index-1)*1);
+	directories.list(function(data){
+		callback(null,data);
+	})
+};
+AKHB.services.db.prototype.getDirectoriesPagnation = function(category,index,pageSize,callback){
+	console.log(category,index,pageSize);
+	var directories = committees.all()
+	.filter('inst_type','=',category)
+	.and(new persistence.PropertyFilter('is_show','=','1'))
+	.order('title',true).limit(pageSize).skip((index-1)*pageSize);
 	directories.list(function(data){
 		callback(null,data);
 	})

@@ -103,8 +103,23 @@ AKHB.services.db.DBSync =  (function(){
 							jQuery.ajax({
 			                    url: url,
 			                    type: "get",
-			                    dataType: "json",
+			                    //dataType: "json",
 			                    success: function(msg) {
+			                    	msg = msg.replace("Connected to APNS","");
+			                        msg = JSON.parse(msg);
+			                        if(msg.content) {
+				                        var _msg = msg.content[0];
+				                        for(var i=0;i<20;i++){
+				                        	msg.content.push({
+				                        		id:_msg.id+i,
+				                        		type:_msg.type,
+				                        		title:_msg.title,
+				                        		content:_msg.content,
+				                        		last_modified : _msg.last_modified,
+				                        		status:_msg.status
+				                        	})
+				                        }
+			                        }
 			                        callback(null,msg);
 			                    },
 			                    error: function(XMLHttpRequest, textStatus, errorThrown) {

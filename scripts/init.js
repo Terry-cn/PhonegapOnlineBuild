@@ -172,6 +172,7 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
     };
     var loadMessage = function(){
        DB.getMessages(function(err,messages){
+        debugger
             scope.$apply( function() {
                 scope.messages = messages;
             });
@@ -645,17 +646,16 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
         $scope.dict.count = 50;
         $rootScope.$emit("BUSY");
         var busy = true;
-
-        DB.getDirectoriesCount($scope.dict.type,function(err,data){
-            $scope.$apply(function(){
-                $scope.dict.count = data;
-                $('ons-list').css('height',45*$scope.dict.count);
-                $scope.MyDelegate.countItems = function() {
-                    return $scope.dict.count;
-                }
-            })
+        // DB.getDirectoriesCount($scope.dict.type,function(err,data){
+        //     $scope.$apply(function(){
+        //         $scope.dict.count = data;
+        //         $('ons-list').css('height',45*$scope.dict.count);
+        //         $scope.MyDelegate.countItems = function() {
+        //             return $scope.dict.count;
+        //         }
+        //     })
             
-        });
+        // });
         $scope.OpenDirectoryDetail = function(directory){
             DB.getCommitteContentById(directory.server_id,function(err,data){
                 if(data) directory.content = data.content; 
@@ -664,35 +664,71 @@ module.controller('DirectoryListController',['$scope','$rootScope','$http','$tem
             })
             
         };
-        var pageIndex = 0;
-        var pageSize = 20;
-
-        $scope.MyDelegate  = {
-          configureItemScope: function(index, itemScope) {
-
-            if(!itemScope.item){
-                itemScope.item = {};
-                DB.getDirectoriesPagnation($scope.dict.type,index,function(err,data){
-                    $scope.$apply(function(){
-                        if(busy) {
-                            busy = false;
-
-                            $rootScope.$emit("NOTBUSY");
-                        } 
-                        itemScope.item = data[0];
-                    })
-                });
-            }
-            //itemScope.item = $scope.dict.items[index];
-          },
-          calculateItemHeight: function(index) {
-            return 45;
-          },
-          countItems: function() {
-            return 5;
-          },
-          destroyItemScope: null
+        $scope.dicts = [];
+        $scope.loadCompleted = false;
+        $scope.pageIndex = 0;
+        $scope.pageSize = 20;
+        $scope.myScroll = null;
+        $scope.isLoading = true;
+        $scope.myScrollOptions = {
+            snap: 'ons-list-item'
         };
+        $scope.myScroll = new IScroll('#wrapper',$scope.myScrollOptions);
+        $scope.getDirectoryDataCallback = function(err,data){
+            $scope.isLoading = false;
+            $scope.$apply(function(){
+                if(data.length < $scope.pageSize){
+                    $scope.loadCompleted = true;
+                }
+                if(busy) {
+                    busy = false;
+                    $rootScope.$emit("NOTBUSY");
+                } 
+                $scope.dicts = $scope.dicts.concat(data);
+                $scope.pageIndex ++;
+
+                setTimeout(function(){
+                    
+                    $scope.myScroll.on('scrollEnd', function (){
+                        if($scope.loadCompleted || $scope.isLoading) return;
+                        $scope.isLoading = true;
+                        DB.getDirectoriesPagnation($scope.dict.type,$scope.pageIndex,$scope.pageSize,$scope.getDirectoryDataCallback);
+                    });
+                    $scope.myScroll.refresh();
+                },500);
+                
+            });
+        }
+        DB.getDirectoriesPagnation($scope.dict.type,$scope.pageIndex,$scope.pageSize,$scope.getDirectoryDataCallback);
+
+        
+
+        // $scope.MyDelegate  = {
+        //   configureItemScope: function(index, itemScope) {
+
+        //     if(!itemScope.item){
+        //         itemScope.item = {};
+        //         DB.getDirectoriesPagnation($scope.dict.type,index,function(err,data){
+        //             $scope.$apply(function(){
+        //                 if(busy) {
+        //                     busy = false;
+
+        //                     $rootScope.$emit("NOTBUSY");
+        //                 } 
+        //                 itemScope.item = data[0];
+        //             })
+        //         });
+        //     }
+        //     //itemScope.item = $scope.dict.items[index];
+        //   },
+        //   calculateItemHeight: function(index) {
+        //     return 45;
+        //   },
+        //   countItems: function() {
+        //     return 5;
+        //   },
+        //   destroyItemScope: null
+        // };
 }]);
 
 module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$templateCache','$sce',
