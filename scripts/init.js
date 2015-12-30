@@ -153,26 +153,14 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
     var scope = $scope;
     scope.nav =  $templateCache.get('navigation');
     scope.menuClick = function(){
-        // app.slidingMenu.setSwipeable(true);
         app.slidingMenu.toggleMenu();
-        // app.slidingMenu.once('postclose',function(){
-        //      app.slidingMenu.setSwipeable(false);
-        // });
     };
     scope.openMessageDetail = function(msg){
-        // if(msg.type == 1){
-        //     DB.setMessageUsed(msg.server_id,function(err,result){
-        //         msg.type = 2;
-        //         console.log(err,result);
-        //     });
-        // }
-        // AKHB.notification.alert(msg.content,null,msg.title);
-        $templateCache.put('message', msg);
+
         myNavigator.pushPage('pages/messagedetail.html');
     };
     var loadMessage = function(){
        DB.getMessages(function(err,messages){
-        debugger
             scope.$apply( function() {
                 scope.messages = messages;
             });
