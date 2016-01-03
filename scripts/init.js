@@ -163,10 +163,7 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
     var loadMessage = function(){
        DB.getMessages(function(err,messages){
             scope.$apply( function() {
-                for(var i=0;i<20;i++){
-                    scope.messages = scope.messages.concat(messages);
-                }
-                //scope.messages = messages;
+                scope.messages = messages;
             });
         }) 
     }
