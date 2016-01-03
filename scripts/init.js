@@ -156,7 +156,8 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
     scope.menuClick = function(){
         app.slidingMenu.toggleMenu();
     };
-    scope.openMessageDetail = function(msg){
+    scope.openMessageDetail = function(msg,$event){
+        if($event.type != "touchend") return;
         $templateCache.put('message',msg);
         myNavigator.pushPage('pages/messagedetail.html');
     };
