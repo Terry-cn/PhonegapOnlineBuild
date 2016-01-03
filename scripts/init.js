@@ -152,17 +152,21 @@ module.controller('LandingPageController',['$scope','$rootScope','$sce','$templa
 module.controller('MessageListController',['$scope','$rootScope','$templateCache',function($scope,$rootScope,$templateCache){
     var scope = $scope;
     scope.nav =  $templateCache.get('navigation');
+    scope.messages = [];
     scope.menuClick = function(){
         app.slidingMenu.toggleMenu();
     };
     scope.openMessageDetail = function(msg){
-
+        $templateCache.put('message',msg);
         myNavigator.pushPage('pages/messagedetail.html');
     };
     var loadMessage = function(){
        DB.getMessages(function(err,messages){
             scope.$apply( function() {
-                scope.messages = messages;
+                for(var i=0;i<20;i++){
+                    scope.messages = scope.messages.concat(messages);
+                }
+                //scope.messages = messages;
             });
         }) 
     }
@@ -171,31 +175,31 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
         loadMessage();
         console.log('emit Refresh');
     });
-    $scope.swipeLeft = function($event){
-        $event.stopPropagation();
-        $event.preventDefault();
-        var target = $($event.target);
-        if(!$($event.target).hasClass('swipe')){
-            target = $($event.target).parents('.swipe:eq(0)').get(0);
-        }
-        $(target).addClass('show-del-btn');
-    };
-    $scope.swipeRight = function($event){
-        var target = $($event.target);
-        $event.stopPropagation();
-        $event.preventDefault();
-         if($event.target.tagName.toLowerCase() != 'ons-list-item'){
-            if($(target.parents('ons-list-item:eq(0)').get(0)).offset().left == 0){
-                app.slidingMenu.openMenu();
-                app.slidingMenu.setSwipeable(true);
-                return;
-            }
-         }
-        if(!$($event.target).hasClass('swipe')){
-            target = $($event.target).parents('.swipe:eq(0)').get(0);
-        }
-        $(target).removeClass('show-del-btn');
-    };
+    // $scope.swipeLeft = function($event){
+    //     $event.stopPropagation();
+    //     $event.preventDefault();
+    //     var target = $($event.target);
+    //     if(!$($event.target).hasClass('swipe')){
+    //         target = $($event.target).parents('.swipe:eq(0)').get(0);
+    //     }
+    //     $(target).addClass('show-del-btn');
+    // };
+    // $scope.swipeRight = function($event){
+    //     var target = $($event.target);
+    //     $event.stopPropagation();
+    //     $event.preventDefault();
+    //      if($event.target.tagName.toLowerCase() != 'ons-list-item'){
+    //         if($(target.parents('ons-list-item:eq(0)').get(0)).offset().left == 0){
+    //             app.slidingMenu.openMenu();
+    //             app.slidingMenu.setSwipeable(true);
+    //             return;
+    //         }
+    //      }
+    //     if(!$($event.target).hasClass('swipe')){
+    //         target = $($event.target).parents('.swipe:eq(0)').get(0);
+    //     }
+    //     $(target).removeClass('show-del-btn');
+    // };
     $scope.deleteMessage = function(msg,$event){
         $event.stopPropagation();
         ons.notification.confirm({
