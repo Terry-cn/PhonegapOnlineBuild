@@ -205,6 +205,7 @@ module.controller('MessageListController',['$scope','$rootScope','$templateCache
             callback: function(answer) {
               if(answer){
                 DB.deleteMessage(msg.server_id,function(){
+                    DB.setUsage(msg.server_id,2,2);
                     $rootScope.$broadcast("Refresh");
                 });
               }
