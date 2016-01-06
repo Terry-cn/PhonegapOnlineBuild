@@ -40,13 +40,17 @@ AKHB.services.authentication = (function(){
 			
 		};
 		this.checkNetworkConnected = function(){
-			if(navigator.network && navigator.network.connection && navigator.network.connection.type == Connection.NONE)
-				throw new Error('nonetwork');
+			if(typeof device != "undefined"){
+				if(navigator.network && navigator.network.connection && navigator.network.connection.type == Connection.NONE)
+					throw new Error('nonetwork');
+			}
 			return true;
 		};
 		this.isNetworkConnected = function(){
+			if(typeof device != "undefined"){
+				return navigator.network && navigator.network.connection && navigator.network.connection.type != Connection.NONE;
+			}
 			return true;
-			return navigator.network && navigator.network.connection && navigator.network.connection.type != Connection.NONE;
 		};
 		this.isWebserviceWorking = function($http,callback){
 			callback(false,null);
