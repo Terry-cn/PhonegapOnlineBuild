@@ -40,7 +40,7 @@ AKHB.services.authentication = (function(){
 			
 		};
 		this.checkNetworkConnected = function(){
-			console.log("checkNetworkConnected",typeof device ,navigator.network , navigator.network.connection , navigator.network.connection.type);
+			//console.log("checkNetworkConnected",typeof device ,navigator.network , navigator.network.connection , navigator.network.connection.type);
 			if(typeof device != "undefined"){
 				if(navigator.network && navigator.network.connection && navigator.network.connection.type == Connection.NONE)
 					throw new Error('nonetwork');
@@ -48,7 +48,7 @@ AKHB.services.authentication = (function(){
 			return true;
 		};
 		this.isNetworkConnected = function(){
-			console.log("isNetworkConnected",typeof device ,navigator.network , navigator.network.connection , navigator.network.connection.type);
+			//console.log("isNetworkConnected",typeof device ,navigator.network , navigator.network.connection , navigator.network.connection.type);
 			if(typeof device != "undefined"){
 				return navigator.network && navigator.network.connection && navigator.network.connection.type != Connection.NONE;
 			}

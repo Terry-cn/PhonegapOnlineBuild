@@ -335,7 +335,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                             syncBackGround();
                     }
                 }
-                if(Auth.checkNetworkConnected()){
+                if(Auth.isCachedAuthentication()){
                     $rootScope.$emit("NOTBUSY");
                     app.slidingMenu.setSwipeable(true); 
                     app.slidingMenu.setMainPage('pages/landingpage.html');
