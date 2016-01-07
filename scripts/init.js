@@ -267,7 +267,6 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                 }
             };
             scope.isready = true;  
-            console.log("AKHB.services.db init Outer.");
               
             setTimeout(function(){
                 DBSync = new AKHB.services.db.DBSync(AKHB.config,$http);
@@ -336,7 +335,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                             syncBackGround();
                     }
                 }
-                if(Auth.isCachedAuthentication()){
+                if(Auth.checkNetworkConnected()){
                     $rootScope.$emit("NOTBUSY");
                     app.slidingMenu.setSwipeable(true); 
                     app.slidingMenu.setMainPage('pages/landingpage.html');
@@ -361,7 +360,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     },MSG_RETUIREDNETWORK.title);
                 document.addEventListener("online", function(){
                     rootScope.$emit("NOTBUSY");
-                    onlineLogin();
+                    initLogin();
                 }, false);
             }
         }
