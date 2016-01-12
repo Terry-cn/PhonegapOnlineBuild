@@ -402,6 +402,7 @@ AKHB.services.db.prototype.syncLatestTask =function(callback){
 	var tasks = syncTask.all()
 	.filter('status','=',0)
 	.order('last_modified',true)
+	.order('committe_id',true)
 	.limit(5);
 	if(!AKHB.services.xhr){
 		AKHB.services.xhr = [];

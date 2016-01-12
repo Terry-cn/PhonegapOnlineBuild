@@ -11,6 +11,19 @@ var DBSync = null;
 window.DB = null;
 
 AKHB.user = { id:null, authcode:null,appVersion:'1.0'};
+AKHB.xhr = [];
+$.ajaxSetup({
+    beforeSend :function(xhr){
+        AKHB.xhr.push(xhr);
+    },complete:function(xhr){
+        var tmp = [];
+        for(var _index in AKHB.xhr){
+            if(AKHB.xhr[_index].readyState == 4){
+                AKHB.xhr.pop(AKHB.xhr[_index]);
+            }
+        }
+    }
+});
 
 AKHB.openContentPage =  function(navigation,$templateCache){
     if(navigation.type == 1){
@@ -55,19 +68,19 @@ module.controller('AppController',['$scope','$rootScope',function($scope,$rootSc
                 clearTimeout(AKHB.services.timer[timer]);
                 delete AKHB.services.timer[timer];
             }
+            for(var _index in AKHB.xhr){
+                if(AKHB.xhr[_index].readyState != 4){
+                    AKHB.xhr[_index].abort();
+                }
+            }
+            AKHB.config.firstRun = true;
             app.slidingMenu.setSwipeable(false); 
             app.slidingMenu.closeMenu();
             app.slidingMenu.setMainPage('pages/login.html');    
         });
     }
     document.addEventListener('deviceready', function(){
-    $.ajaxSetup({
-        beforeSend :function(xhr){
-            console.log(xhr);
-        },complete:function(xhr){
-            console.log(xhr);
-        }
-    });
+
 
     if(!window.plugins || !window.plugins.pushNotification) return;
     try{
