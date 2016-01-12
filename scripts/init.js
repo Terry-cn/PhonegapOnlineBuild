@@ -51,15 +51,24 @@ module.controller('AppController',['$scope','$rootScope',function($scope,$rootSc
     $rootScope.signOut = function(){
         var Auth = new AKHB.services.authentication(AKHB.config);
         Auth.cleanAuthentication(function(){
+            for(var timer in AKHB.services.timer){
+                clearTimeout(AKHB.services.timer[timer]);
+                delete AKHB.services.timer[timer];
+            }
             app.slidingMenu.setSwipeable(false); 
             app.slidingMenu.closeMenu();
             app.slidingMenu.setMainPage('pages/login.html');    
         });
     }
     document.addEventListener('deviceready', function(){
-    
+    $.ajaxSetup({
+        beforeSend :function(xhr){
+            console.log(xhr);
+        },complete:function(xhr){
+            console.log(xhr);
+        }
+    });
 
-    
     if(!window.plugins || !window.plugins.pushNotification) return;
     try{
        
@@ -344,7 +353,7 @@ module.controller('LoginController',['$scope','$http','$templateCache','$rootSco
                     DBSync.runInBackGround(function(err){
                         //$rootScope.$emit("BUSY");
                         syncBackGround();
-                    });
+                    },true);
                    runMessageSync();
 
                 }else{
