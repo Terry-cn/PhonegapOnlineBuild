@@ -88,6 +88,8 @@ var persons = persistence.define('persons', {
     home_number:"TEXT",
     mobile:"TEXT",
     email:"TEXT",
+    server_id:"INT",
+    last_modified:"DATE",
 });
 
 var committees = persistence.define('committees', {
