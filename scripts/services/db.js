@@ -472,14 +472,16 @@ AKHB.services.db.prototype.syncLatestTask =function(callback){
 									callback(null,data);
 								});
 							},function(committeeContent,callback){
-								committeePersons.all().filter('committe_id','=',committeeContent.server_id).list(function(data){
-									if(data && data.length >0){
-										committeePersons.remove(list,function(err){
-											callback(err);
-										})
-									}else{
-										callback(null);
-									}
+								committeePersons.all().filter('committe_id','=',committeeContent.server_id)
+								.destroyAll(function(data){
+								//.list(function(data){
+									callback(data);
+									// if(data && data.length >0){
+									// 	console.log('delete',data);
+		
+									// }else{
+									// 	callback(null);
+									// }
 								})
 							},function(callback){
 								async.each(data.content,function(role,contentCallback){
