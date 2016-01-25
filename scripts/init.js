@@ -753,9 +753,12 @@ module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$t
         $rootScope.$emit("NOTBUSY");
         // if(typeof $scope.directory.members == "undefined")
         //     $scope.directory.members = JSON.parse($scope.directory.content);
-        if(typeof $scope.directory.members == "undefined" && $scope.directory.content){
+        try{
             $scope.directory.members = JSON.parse($scope.directory.content);
+        }catch(ex){
+
         }
+        
         if(!$scope.directory.content){
             $scope.isSync = true;
         }

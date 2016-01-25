@@ -464,11 +464,10 @@ AKHB.services.db.DBSync =  (function(){
 						
 					}
 					if(noSleep && AKHB.config.firstRun){
-						
 						AKHB.config.firstRun = false;
 						var syncTask = function(){
 							DB.syncLatestTask(function(){
-								AKHB.services.timer.latestTask = setTimeout(syncTask,10000);
+								AKHB.services.timer.latestTask = setTimeout(syncTask,AKHB.config.taskTimeout);
 							});
 						}
 						syncTask();
