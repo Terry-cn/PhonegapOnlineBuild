@@ -467,7 +467,7 @@ AKHB.services.db.prototype.syncLatestTask =function(callback){
 		}	
 		
 		async.each(data,function(item,callback){
-			var url = AKHB.config.remoteAddress+'/webservice.php?type=2&table=directory';
+			var url = AKHB.config.remoteAddress+'?type=2&table=directory';
 			url+='&id='+item.committe_id;
 			url+='&inst_type='+item.inst_type;
 			url+='&uuid='+AKHB.user.id;

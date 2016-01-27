@@ -27,7 +27,7 @@
            
     <preference name="target-device" value="universal" />
     <preference name="Fullscreen" value="false" />
-    <preference name="StatusBarOverlaysWebView" value="true" />
+	<preference name="StatusBarOverlaysWebView" value="true" />
     <preference name="WebViewBounce" value="false" />
     <preference name="DisallowOverscroll" value="true" />
     <preference name="orientation" value="portrait"/>

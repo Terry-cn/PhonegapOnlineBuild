@@ -9,8 +9,7 @@
     </ons-toolbar>
     <ons-list>
         <ons-list-header ng-show="directory.description">{{directory.title}}</ons-list-header>
-        <ons-list-item ng-show="directory.description" class="item-description">
-            {{directory.description}}
+        <ons-list-item ng-show="directory.description" class="item-description" ng-bind-html="directory.description | trustHtml">
         </ons-list-item>
         <ons-list-header ng-show="directory.email">Email</ons-list-header>
         <ons-list-item ng-show="directory.email">
@@ -25,7 +24,7 @@
         </ons-list-item>
         <ons-list-header ng-show="isSync">Members</ons-list-header>
         <ons-list-item  ng-show="isSync" class="item-name" style="word-break: break-word;white-space: normal;line-height: 160%;">
-        Menmber details are still downloading,please check back later.
+        Member details are still downloading, please check back later.
         </ons-list-item>
     </ons-list>
 </ons-page>

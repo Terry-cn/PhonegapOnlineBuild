@@ -920,7 +920,7 @@ function errorHandler (error) {
     navigator.notification.alert('error = ' + error,null,'Error');
 }
 function sendRegistionId(id){
-    var url = window.AKHB.config.remoteAddress+'/webservice.php?type=4&deviceid='+AKHB.user.deviceid+'&notificationid=' + id;
+    var url = window.AKHB.config.remoteAddress+'?type=4&deviceid='+AKHB.user.deviceid+'&notificationid=' + id;
     $.get(url,function(data){
     })
 }
