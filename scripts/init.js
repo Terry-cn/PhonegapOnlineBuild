@@ -1,8 +1,7 @@
-
 //ons.disableAutoStatusBarFill();  // (Monaca enables StatusBar plugin by  
 var MSG_RETUIREDNETWORK = {title:'Internet Connection',content:'Sorry, a network connection is required, please try later.'};
 var MSG_LOGINFAILED = {title:'Incorrect Password',content:'Please check password and try again.'};
-var MSG_SYSTEMERROR = {title:'System Error',content:'There has been an error,Please contact <a href="mailto:enquiries@iiuk.org">enquiries@iiuk.org</a>. <br /> Error Code:{0}'};
+var MSG_SYSTEMERROR = {title:'System Error',content:'There has been an error, Please contact <a href="mailto:enquiries@iiuk.org">enquiries@iiuk.org</a>. <br /> Error Code:{0}'};
 
 var pushNotification;
 var module = ons.bootstrap('AKHB', ['onsen','ngTouch']);
@@ -126,6 +125,10 @@ module.controller('AppController',['$scope','$rootScope',function($scope,$rootSc
     }
 
     }, false);
+    // Added to update iOS bade with unread message count.
+    document.addEventListener("pause", function(){ 
+	updateBadge($rootScope.messageCount);
+    },false);
 }]);
 
 module.controller('SlidingMenuController',['$scope',function($scope){
@@ -135,6 +138,7 @@ module.controller('SlidingMenuController',['$scope',function($scope){
 }]);
 module.controller('LandingPageController',['$scope','$rootScope','$sce','$templateCache',function($scope,$rootScope,$sce,$templateCache){
     var scope = $scope;
+    var rootScope = $rootScope; // Added to allow access to messageCount
 
      $scope.openPage = function(nav){
         $templateCache.put('navigation',nav);
@@ -162,6 +166,7 @@ module.controller('LandingPageController',['$scope','$rootScope','$sce','$templa
                         DB.setUsage(result.server_id,1,1,0);
                     }
                     scope.messageCount = count;
+		     $rootScope.messageCount = count; // Added to allow access to messageCount
                     scope.hasMessage = count > 0;
                     scope.navigations = navigations;
                     scope.title = $sce.trustAsHtml(result.title);
@@ -860,6 +865,17 @@ $(document).on('click','a',function(e){
             if($href.toLowerCase().indexOf('http') == 0){
                 window.open( $href, '_blank', 'location=yes');
 
+            }else if($href.toLowerCase().indexOf('tel') == 0){
+               navigator.notification.confirm(
+                    "",
+                    function(buttonIndex) {
+                        if(!buttonIndex){
+                            window.open( $href, '_system', 'location=yes');
+                        }
+                    },
+                    $(this).text(),
+                    ["Cancel","Call"]
+                );
             }else if($href.toLowerCase().indexOf('mailto') == 0){
                 window.plugin.email.open({
                     to:[$href.substring(7)]
@@ -924,11 +940,38 @@ function sendRegistionId(id){
     $.get(url,function(data){
     })
 }
+
+// notificationFeedback Service
+function notificationFeedback(buttonIndex,passedData) {
+	var url = window.AKHB.config.remoteAddress+'?type=5&uuid='+AKHB.user.id+'other='+passedData+'buttonIndex='+buttonIndex;
+	$.get(url,function(data){
+	})
+}
+
+// added badge update function
+function updateBadge(badgeCount){
+    var pushNotification = window.plugins.pushNotification;
+    pushNotification.setApplicationIconBadgeNumber(successHandler, successHandler, badgeCount); 
+    //cordova.plugins.notification.badge.set(badgeCount); // Android
+}
+
 // iOS
 function onNotificationAPN (event) {
     if ( event.alert )
     {
-        navigator.notification.alert(event.alert,null,'New Notification');
+		if (event.type == '2') { 
+			navigator.notification.confirm(
+	        	event.alert,
+	        	function(buttonIndex) {
+		       	 notificationFeedback(buttonIndex,event.other);
+			   	},
+			   	event.title,
+			   	event.buttons
+			);
+
+		} else {
+	        navigator.notification.alert(event.alert,null,event.title);
+		}
     }
 
     if ( event.sound )
@@ -968,7 +1011,22 @@ function onNotificationGCM(e) {
             var my_media = new Media("/android_asset/www/"+ soundfile);
             my_media.play();
         }
-        navigator.notification.alert('message = '+e.message+' msgcnt = '+e.msgcnt,null,'New Notification');
+//        navigator.notification.alert('message = '+e.message+' msgcnt = '+e.msgcnt,null,'New Notification');
+        
+        if (e.payload.type == '2') { 
+			//navigator.notification.confirm(e.message,adminLogin,'IIUK.org',['Cancel','Login']);
+			 navigator.notification.confirm(
+	        	e.message,
+	        	function(buttonIndex) {
+		       	 notificationFeedback(buttonIndex,e.payload.other);
+			   	},
+			   	e.payload.title,
+			   	e.payload.buttons
+			);
+      
+        } else {
+	        navigator.notification.alert(e.message,null,e.payload.title);
+		}
 
     break;
 
