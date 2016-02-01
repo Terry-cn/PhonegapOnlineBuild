@@ -868,10 +868,8 @@ $(document).on('click','a',function(e){
                 navigator.notification.confirm(
                     "",
                     function(buttonIndex) {
-                        alert(buttonIndex);
-                        window.open( $href, '_system', 'location=yes');
-                        if(!buttonIndex){
-                           e.preventDefault();
+                        if(buttonIndex == 1){
+                           window.open( $href, '_system', 'location=yes');
                         }
                     },
                     $(this).text(),
