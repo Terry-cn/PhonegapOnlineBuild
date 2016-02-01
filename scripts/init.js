@@ -861,21 +861,21 @@ $(document).on('click','a',function(e){
         var $this = $(this);
         var $href = $this.attr('href');
         if($href != ''){
-            e.preventDefault();
+            
             if($href.toLowerCase().indexOf('http') == 0){
                 window.open( $href, '_blank', 'location=yes');
-
             }else if($href.toLowerCase().indexOf('tel') == 0){
-               navigator.notification.confirm(
+                navigator.notification.confirm(
                     "",
                     function(buttonIndex) {
                         if(!buttonIndex){
-                            window.open( $href, '_system', 'location=yes');
+                           e.preventDefault();
                         }
                     },
                     $(this).text(),
                     ["Cancel","Call"]
                 );
+               return;
             }else if($href.toLowerCase().indexOf('mailto') == 0){
                 window.plugin.email.open({
                     to:[$href.substring(7)]
@@ -883,6 +883,7 @@ $(document).on('click','a',function(e){
             }else{
                  window.open( $href, '_system', 'location=yes');
             }
+            e.preventDefault();
         } 
 })
 /*.on('swipe','ons-list-item.swipe',function(e){
