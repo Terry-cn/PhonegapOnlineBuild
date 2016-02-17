@@ -42,7 +42,7 @@ AKHB.openContentPage =  function(navigation,$templateCache){
 }
 
 
-module.controller('AppController',['$scope','$rootScope',function($scope,$rootScope){
+module.controller('AppController',['$scope','$rootScope','$templateCache',function($scope,$rootScope,$templateCache){
     
     $rootScope.$on("BUSY", function(){ 
         $scope.busy = true;
@@ -60,6 +60,28 @@ module.controller('AppController',['$scope','$rootScope',function($scope,$rootSc
         console.log('emit WAITINGNETWORK',$scope.busy,$scope.$id);
     });
 
+    $rootScope.openIndividual = function(individual,isindividual){
+        $rootScope.$emit("BUSY");
+        if(isindividual){
+            $templateCache.put('individual',individual);
+            myNavigator.pushPage('pages/directoryindividual.html');
+        }else{
+            DB.getCommitteById(individual.id,function(err,data){
+                if(!err && data){
+                    var directory = data;
+                    DB.getCommitteContentById(directory.server_id,function(err,data){
+                        if(data) directory.content = JSON.parse(data.content); 
+                        $templateCache.put('directory',directory);
+                        myNavigator.pushPage('pages/directorydetail.html');
+                    })
+                }else{
+                    $templateCache.put('individual',individual);
+                    myNavigator.pushPage('pages/directoryindividual.html');
+                }
+            })
+        }
+        
+    };
     $rootScope.signOut = function(){
         var Auth = new AKHB.services.authentication(AKHB.config);
         Auth.cleanAuthentication(function(){
@@ -583,11 +605,8 @@ module.controller('DirectoryController',['$scope','$rootScope','$http','$templat
         };
 
         $scope.openIndividual = function(individual){
-            $rootScope.$emit("BUSY");
-            $templateCache.put('individual',individual);
-            myNavigator.pushPage('pages/directoryindividual.html');
+            $rootScope.openIndividual(individual,true);
         };
-
         $scope.clearInput = function(){
 
             $scope.key = '';
@@ -772,9 +791,7 @@ module.controller('DirectoryDetailController',['$scope','$rootScope','$http','$t
             $scope.isSync = true;
         }
         $scope.openIndividual = function(individual){
-            $rootScope.$emit("BUSY");
-            $templateCache.put('individual',individual);
-            myNavigator.pushPage('pages/directoryindividual.html');
+            $rootScope.openIndividual(individual,true);
         };
 }]);
 module.controller('DirectoryIndividualController',['$scope','$rootScope','$http','$templateCache','$sce',
@@ -784,21 +801,13 @@ module.controller('DirectoryIndividualController',['$scope','$rootScope','$http'
         if(!$scope.individual.name){
             $scope.individual.name = $scope.individual.forename + ' '+$scope.individual.Surname;
         }
-        if(typeof $scope.individual.committees == 'string'){
-            $scope.individual.committees = JSON.parse($scope.individual.committees);
+        if($scope.individual.committees && typeof $scope.individual.committees == 'string'){
+            $scope.individual.committees_json = JSON.parse($scope.individual.committees);
+        }else if(typeof $scope.individual.committees == 'object'){
+            $scope.individual.committees_json = $scope.individual.committees;
         }
         $scope.openIndividual = function(individual){
-            $rootScope.$emit("BUSY");
-            DB.getCommitteById(individual.id,function(err,data){
-                if(!err && data){
-                    $templateCache.put('directory',data);
-                    myNavigator.pushPage('pages/directorydetail.html');
-                }else{
-                    $templateCache.put('individual',individual);
-                    myNavigator.pushPage('pages/directoryindividual.html');
-                }
-            })
-            
+            $rootScope.openIndividual(individual);
         };
 }]);
 module.controller('DirectoryDescriptionController',['$scope','$rootScope','$http','$templateCache','$sce',
