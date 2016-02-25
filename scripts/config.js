@@ -6,7 +6,7 @@ window.AKHB ={
 		debug:true,
 		version:null,
 		timeout:60*1000*30,
-		taskTimeout:1000*5,
+		taskTimeout:1000*30,
 		messageSyncTimeout:1000*30,
 		senderID:'31742222780'
 	}
